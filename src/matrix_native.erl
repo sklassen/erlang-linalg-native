@@ -3,7 +3,8 @@
 -author('simon.klassen').
 -export([transpose/1,multiply/2]). 
 
-transpose([[]]) -> [[]];
+transpose([[]]) -> [];
+transpose([[X]]) -> [[X]];
 transpose([[] | XXs]) -> transpose(XXs);
 transpose([[X | Xs] | XXs]) -> [[X | [H || [H | _Tail ] <- XXs]] | transpose([Xs | [Tail || [_|Tail] <- XXs]])].
 
