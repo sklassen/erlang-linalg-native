@@ -3,10 +3,6 @@
 -author('simon.klassen').
 -export([transpose/1,multiply/2]). 
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
 transpose([[]]) -> [[]];
 transpose([[] | XXs]) -> transpose(XXs);
 transpose([[X | Xs] | XXs]) -> [[X | [H || [H | _Tail ] <- XXs]] | transpose([Xs | [Tail || [_|Tail] <- XXs]])].
@@ -31,17 +27,4 @@ multiply(M1, M2) ->
 	NCols = length(lists:nth(1,M2)), 
 	NRows = length(M1), 
 	multiply(Inner, NCols, NRows,[], M1, transpose(M2)).
-
-
--ifdef(TEST).
-
-transpose_test() ->
-	transpose([[1.0,2.0],[3.0,4.0]])==[[1.0,3.0],[2.0,4.0]].
-
-multiply_test()->
-	multiply([[1.0,2.0],[3.0,4.0]],[[1.0,3.0],[2.0,4.0]])==[[5.0,11.0],[11.0,25.0]].
-
--endif.
-
-
 
