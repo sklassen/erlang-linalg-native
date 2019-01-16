@@ -2,9 +2,6 @@
 -import(matrix_native,[transpose/1,multiply/2]).
 -include_lib("eunit/include/eunit.hrl").
 
-transpose_0_test() ->
-	?assert(transpose([[]])==[[]]).
-
 transpose_1_test() ->
 	?assert(transpose([[8.0]])=:=[[8.0]]).
 
