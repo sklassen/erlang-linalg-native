@@ -1,4 +1,4 @@
-{application, matrix_native,
+{application, linalg_native,
  [
   {description, ""},
   {vsn, "1"},
@@ -7,6 +7,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { matrix_native, []}},
+  {mod, { linalg_native, []}},
   {env, []}
  ]}.
