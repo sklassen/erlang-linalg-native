@@ -2,7 +2,7 @@
 -vsn('1.0').
 -author('simon.klassen').
 -import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
--export([row/2,col/2]). 
+-export([row/2,col/2,cell/3]). 
 -export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2]). 
 -export([zeros/1,ones/1,identity/1,diag/1]).
 -export([exp/1,log/1]).
@@ -75,6 +75,9 @@ row(I,Matrix) when I<0 ->
 
 col(J,Matrix) ->
     transpose(row(J,transpose(Matrix))).
+
+cell(I,J,Matrix) ->
+    col(J,row(I,Matrix)).
 
 % Solves
 det([[X]])->
