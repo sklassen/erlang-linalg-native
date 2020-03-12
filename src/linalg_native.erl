@@ -5,7 +5,7 @@
 -import(linalg_arithmetric,[exp/1,log/1,add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([row/2,col/2,cell/3]). 
 -export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2]). 
--export([zeros/1,ones/1,identity/1,diag/1]).
+-export([zeros/1,ones/1,identity/1,diag/1,eye/1,eye/2]).
 
 % linalg shape 
 shape(X) when is_number(X)->
@@ -27,6 +27,14 @@ ones(N) ->
 % generation (matrix)
 %sequential(NR,NC) ->
 %	[ [ (((R-1)*NC)+C)/1.0 || C<-seq(1,NC)] || R<-seq(1,NR)].
+
+eye(0)->
+     eye([[]]);
+eye(N)->
+     eye(N,N).
+eye(N,M) ->
+      [ [ case {R,C} of {C,R} -> 1.0; _->0.0 end||R<-seq(1,M)] || C<-seq(1,N)].
+
 
 diag([H|_]=X) when is_number(H)->
 	[ [ case R of C -> nth(R,X); _->0.0 end||R<-seq(1,length(X))] || C<-seq(1,length(X))].
@@ -76,7 +84,7 @@ col(J,Matrix) ->
     transpose(row(J,transpose(Matrix))).
 
 cell(I,J,Matrix) ->
-    col(J,row(I,Matrix)).
+    nth(J,nth(1,row(I,Matrix))).
 
 % Solves
 det([[X]])->

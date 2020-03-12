@@ -1,7 +1,8 @@
 -module(linalg_arithmetric). 
 -vsn('1.0').
 -author('simon.klassen').
--import(lists,[reverse/1,zip/2]).
+-import(lists,[reverse/1,zip/2,foldl/3]).
+-export([sum/1]).
 -export([exp/1,log/1]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 
@@ -26,6 +27,16 @@ divide(M1,M2)->
 
 pow(M1,M2)->
     sig2(M1,M2,fun(A,B)->math:pow(A,B) end,[]).
+
+% Reductions
+
+sum(X) when is_number(X)->X;
+  sum([])->0;
+  sum([H|_]=Vector) when is_number(H)->
+      foldl(fun(A,Sum)->Sum+A end,0,Vector);
+  sum([H|Tail])->
+      sum(H)+sum(Tail).
+
 
 % private functions
 
