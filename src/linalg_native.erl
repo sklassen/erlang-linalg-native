@@ -1,11 +1,11 @@
 -module(linalg_native). 
 -vsn('1.0').
 -author('simon.klassen').
--import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
--import(linalg_arithmetric,[exp/1,log/1,add/2,sub/2,mul/2,divide/2,pow/2]).
+-import(lists,[append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
+-import(linalg_arithmetric,[mul/2,divide/2,pow/2]).
 -export([row/2,col/2,cell/3]). 
--export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2]). 
--export([zeros/1,ones/1,identity/1,diag/1,eye/1,eye/2]).
+-export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2,matmul2/2]). 
+-export([zeros/1,ones/1,identity/1,diag/1,eye/1,eye/2,sequential/1,sequential/2]).
 
 % linalg shape 
 shape(X) when is_number(X)->
@@ -24,9 +24,12 @@ zeros(N) ->
 ones(N) -> 
 	[ 1.0 ||_<-seq(1,N)].
 
+sequential(N) ->
+	[ X||X<-seq(1,N)].
+
 % generation (matrix)
-%sequential(NR,NC) ->
-%	[ [ (((R-1)*NC)+C)/1.0 || C<-seq(1,NC)] || R<-seq(1,NR)].
+sequential(NR,NC) ->
+	[ [ (((R-1)*NC)+C)/1.0 || C<-seq(1,NC)] || R<-seq(1,NR)].
 
 eye(0)->
      eye([[]]);
@@ -47,7 +50,6 @@ transpose([[]]) -> [];
 transpose([[X]]) -> [[X]];
 transpose([[] | XXs]) -> transpose(XXs);
 transpose([[X | Xs] | XXs]) -> [[X | [H || [H | _Tail ] <- XXs]] | transpose([Xs | [Tail || [_|Tail] <- XXs]])].
-
 
 % Sum Product
 dot([],[],_) ->[];
@@ -72,6 +74,9 @@ rowmult(_, 0, _, L, _, _) -> L;
 rowmult(I, C, R, L, M1, M2) -> 
 	SumProd = dot(nth(R,M1),nth(C,M2)),
 	rowmult(I, C-1, R, [SumProd|L], M1, M2).
+
+% Slower but succient. 
+matmul2(M1,M2) -> [ [ foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,A,B))|| A <- transpose(M1) ]|| B <- M2 ].
 
 
 row(I,Matrix) when I>0 ->

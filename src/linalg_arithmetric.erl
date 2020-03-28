@@ -2,16 +2,21 @@
 -vsn('1.0').
 -author('simon.klassen').
 -import(lists,[reverse/1,zip/2,foldl/3]).
--export([sum/1]).
--export([exp/1,log/1]).
+-export([sum/1,norm/1]).
+-export([epsilon/1,exp/1,log/1]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
+-define(EPSILON,1/1000000).
 
 % Arithmetric
+-spec exp(list())->list().
 exp(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
 
 log(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
+
+epsilon(M)->
+    sig1(M,fun(X)-> case (abs(X)<?EPSILON) of true->0; false->X end end,[]).
 
 add(M1,M2)->
     sig2(M1,M2,fun(A,B)->A+B end,[]).
@@ -30,13 +35,15 @@ pow(M1,M2)->
 
 % Reductions
 
-sum(X) when is_number(X)->X;
-  sum([])->0;
-  sum([H|_]=Vector) when is_number(H)->
-      foldl(fun(A,Sum)->Sum+A end,0,Vector);
-  sum([H|Tail])->
-      sum(H)+sum(Tail).
+norm([H|_]=Vector) when is_number(H)->
+    math:sqrt(sum(pow(Vector,2))).
 
+sum(X) when is_number(X)->X;
+sum([])->0;
+sum([H|_]=Vector) when is_number(H)->
+    foldl(fun(A,Sum)->Sum+A end,0,Vector);
+sum([H|Tail])->
+    sum(H)+sum(Tail).
 
 % private functions
 
