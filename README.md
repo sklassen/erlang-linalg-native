@@ -19,7 +19,7 @@ Only a few functions are supported at the moment, see the tests directory for ex
 
 	Eshell V5.10.4  (abort with ^G)
 
-	1> linalg_native:dot([[1.0,2.0],[3.0,4.0]]).
+	1> linalg_native:dot([1.0,2.0],[3.0,4.0]).
 
 	1> linalg_native:transpose([[1.0,2.0],[3.0,4.0]]).
 
