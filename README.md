@@ -26,4 +26,6 @@ Only a few functions are supported at the moment, see the tests directory for ex
 	1> linalg_native:matmul([[1.0,2.0],[3.0,4.0]],[[1.0,2.0,3.0],[4.0,5.0,6.0]]).
 
 
-
+License
+-----
+This project is licensed under the terms of the GNU General Public License v3.0	
