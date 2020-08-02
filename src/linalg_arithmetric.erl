@@ -3,17 +3,20 @@
 -author('simon.klassen').
 -import(lists,[reverse/1,zip/2,foldl/3]).
 -export([sum/1,norm/1]).
--export([epsilon/1,exp/1,log/1]).
+-export([epsilon/1,exp/1,log/1,sqrt/1]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -define(EPSILON,1/1000000).
+-define(NA,na).
 
 % Arithmetric
--spec exp(list())->list().
 exp(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
 
 log(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
+
+sqrt(M)->
+    sig1(M,fun(X)->math:sqrt(X) end,[]).
 
 epsilon(M)->
     sig1(M,fun(X)-> case (abs(X)<?EPSILON) of true->0; false->X end end,[]).
@@ -28,13 +31,12 @@ mul(M1,M2)->
     sig2(M1,M2,fun(A,B)->A*B end,[]).
 
 divide(M1,M2)->
-    sig2(M1,M2,fun(A,B)->case B of 0-> na; B-> A/B end end,[]).
+    sig2(M1,M2,fun(A,B)->case B of 0-> ?NA; B-> A/B end end,[]).
 
 pow(M1,M2)->
     sig2(M1,M2,fun(A,B)->math:pow(A,B) end,[]).
 
 % Reductions
-
 norm([H|_]=Vector) when is_number(H)->
     math:sqrt(sum(pow(Vector,2))).
 
