@@ -4,7 +4,7 @@
 -import(lists,[append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
 -import(linalg_arithmetric,[mul/2,divide/2,pow/2]).
 -export([row/2,col/2,cell/3]). 
--export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2,matmul2/2,matmul3/2]). 
+-export([transpose/1,det/1,inv/1,shape/1,dot/2,matmul/2]). 
 -export([zeros/1,ones/1,identity/1,diag/1,eye/1,eye/2,sequential/1,sequential/2]).
 
 % linalg shape 
@@ -72,22 +72,12 @@ rowmult(_, [], R) -> lists:reverse(R);
 rowmult(Row, [Col|Rest], R) ->
     rowmult(Row, Rest, [dot(Row, Col)|R]).
 
-% Slower but succient. 
-matmul3(M1,M2) -> [ [ foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,A,B))|| A <- transpose(M1) ]|| B <- M2 ].
-
-matmul2(M1 = [H1|_], M2) when length(H1) =:= length(M2) ->
-    matmul2(M1, transpose(M2), []).
-
-matmul2([], _, R) -> lists:reverse(R);
-matmul2([Row|Rest], M2, R) ->
-    matmul2(Rest, M2, [rowmult2(Row, M2, [])|R]).
-
-rowmult2(_, [], R) -> lists:reverse(R);
-rowmult2(Row, [Col|Rest], R) ->
-    rowmult2(Row, Rest, [dot(Row, Col)|R]).
+% Note: much slower but succient. 
+% matmul_zipwith(M1,M2) -> 
+%   [ [ foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,A,B))|| A <- transpose(M1) ]|| B <- M2 ].
 
 
-
+% Reference
 row(I,Matrix) when I>0 ->
     [nth(I,Matrix)];
 row(I,Matrix) when I<0 ->
