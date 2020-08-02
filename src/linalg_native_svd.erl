@@ -5,7 +5,9 @@
 -import(linalg_arithmetric,[norm/1,sub/2,mul/2,divide/2]).
 -export([qr/1]).
 
--type matrix() :: list(list(float)).
+-type scalar() :: number().
+-type vector() :: list(scalar()).
+-type matrix() :: list(vector()).
 
 % wikipedia
 % linalg_native_svd:householder([[12,-51,4],[6,167,-68],[-4,24,-41]]).
