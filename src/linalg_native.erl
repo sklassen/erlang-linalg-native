@@ -58,22 +58,16 @@ dot([A|VecA],[B|VecB],Sum) ->dot(VecA,VecB,Sum+A*B).
 dot(VecA,VecB) ->dot(VecA,VecB,0).
 
 % Matrix Multiplication
-matmul(M1, M2) -> 
-	Inner = length(M2),
-	NCols = length(nth(1,M2)), 
-	NRows = length(M1), 
-	matmul(Inner, NCols, NRows,[], M1, transpose(M2)).
+matmul(M1 = [H1|_], M2) when length(H1) =:= length(M2) ->
+    matmul(M1, transpose(M2), []).
 
-matmul(_, _, 0, MM, _, _) -> MM;
-matmul(I, C, R, MM, M1, M2) ->
-	NewRow = rowmult(I, C, R, [], M1, M2),
-	matmul(I, C, R-1, [NewRow|MM], M1, M2).
+matmul([], _, R) -> lists:reverse(R);
+matmul([Row|Rest], M2, R) ->
+    matmul(Rest, M2, [rowmult(Row, M2, [])|R]).
 
-
-rowmult(_, 0, _, L, _, _) -> L;
-rowmult(I, C, R, L, M1, M2) -> 
-	SumProd = dot(nth(R,M1),nth(C,M2)),
-	rowmult(I, C-1, R, [SumProd|L], M1, M2).
+rowmult(_, [], R) -> lists:reverse(R);
+rowmult(Row, [Col|Rest], R) ->
+    rowmult(Row, Rest, [dot(Row, Col)|R]).
 
 % Slower but succient. 
 matmul2(M1,M2) -> [ [ foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,A,B))|| A <- transpose(M1) ]|| B <- M2 ].
