@@ -1,6 +1,6 @@
 -module(linalg_arithmetric_tests). 
 -import(linalg_arithmetric,[exp/1,log/1]).
--import(linalg_arithmetric,[mul/2]).
+-import(linalg_arithmetric,[mul/2,add/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 exp_s_test() ->
@@ -27,4 +27,9 @@ mul_1x1_test() ->
 mul_mxm_test() ->
 	?assert(mul([[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]])==[[1,4,9],[16,25,36]]).
 
-
+add_test() ->
+    [
+    ?assert(add(2, 3) == 5),
+    ?assert(add([1, 2], [3, 4]) == [4, 6]),
+    ?assert(add([[1, 2], [3, 4]], [[2, 3], [4, 5]]) == [[3, 5], [7, 9]])
+    ].
