@@ -65,5 +65,5 @@ roots([1,A,B,C]) ->
 sign(A,B)->
     case B>=0.0 of
         true->abs(A);
-        false-> -abs(B)
+        false-> -abs(A)
     end.
