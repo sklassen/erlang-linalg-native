@@ -1,4 +1,4 @@
-{application, linalg_native,
+{application, linalg,
  [
   {description, ""},
   {vsn, "1"},
@@ -7,6 +7,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { linalg_native, []}},
+  {mod, { linalg, []}},
   {env, []}
  ]}.

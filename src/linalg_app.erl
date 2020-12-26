@@ -1,4 +1,4 @@
--module(linalg_native_app).
+-module(linalg_app).
 -author('simon.klassen').
 -export([start/2]).
 

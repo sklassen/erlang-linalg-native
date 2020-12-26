@@ -1,4 +1,4 @@
--module(linalg_native). 
+-module(linalg). 
 -vsn('1.0').
 -author('simon.klassen').
 -import(lists,[append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).

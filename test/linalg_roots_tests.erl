@@ -1,5 +1,5 @@
 -module(linalg_roots_tests). 
--import(linalg_native_roots,[roots/1]).
+-import(linalg_roots,[roots/1]).
 -include_lib("eunit/include/eunit.hrl").
 
 roots_0_test() ->

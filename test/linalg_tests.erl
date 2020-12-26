@@ -1,5 +1,5 @@
--module(linalg_native_tests). 
--import(linalg_native,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
+-module(linalg_tests). 
+-import(linalg,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 dot_3_test() ->

@@ -1,4 +1,4 @@
--module(linalg_native_roots).
+-module(linalg_roots).
 -vsn('1.0').
 -author('simon.klassen').
 -import(math,[pi/0,acos/1,cos/1,sqrt/1,pow/2]).

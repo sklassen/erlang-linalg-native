@@ -1,7 +1,7 @@
--module(linalg_native_svd).
+-module(linalg_svd).
 -vsn('1.0').
 -author('simon.klassen').
--import(linalg_native,[transpose/1,eye/1,matmul/2]).
+-import(linalg,[transpose/1,eye/1,matmul/2]).
 -import(linalg_arithmetric,[norm/1,sub/2,mul/2,divide/2]).
 -export([qr/1]).
 

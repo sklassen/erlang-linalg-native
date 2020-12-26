@@ -1,5 +1,5 @@
 -module(linalg_svd_tests). 
--import(linalg_native_svd,[qr/1]).
+-import(linalg_svd,[qr/1]).
 -include_lib("eunit/include/eunit.hrl").
 
 qr_1_test() ->
