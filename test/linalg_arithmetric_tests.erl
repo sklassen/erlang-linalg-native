@@ -1,6 +1,5 @@
 -module(linalg_arithmetric_tests). 
--import(linalg_arithmetric,[exp/1,log/1,norm/1]).
--import(linalg_arithmetric,[mul/2,add/2]).
+-import(linalg,[exp/1,log/1,norm/1,mul/2,add/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 exp_s_test() ->

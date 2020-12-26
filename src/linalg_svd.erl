@@ -1,9 +1,8 @@
 -module(linalg_svd).
 -vsn('1.0').
 -author('simon.klassen').
--import(linalg,[transpose/1,eye/1,matmul/2]).
--import(linalg_arithmetric,[norm/1,sub/2,mul/2,divide/2]).
--export([qr/1]).
+-import(linalg,[transpose/1,eye/1,matmul/2,norm/1,sub/2,mul/2,divide/2]).
+-export([qr/1,svd/1]).
 
 -type scalar() :: number().
 -type vector() :: list(scalar()).
@@ -61,3 +60,6 @@ pad(ColWise,N)->
 -spec qr(matrix()) -> {matrix(),matrix()}.
 qr(RowWise)->
    householder(transpose(RowWise)).
+
+svd(_RowWise)->
+   {undefined,undefined,undefined}.

@@ -1,4 +1,4 @@
--module(linalg_tests). 
+-module(linalg_matrix_tests). 
 -import(linalg,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
 
