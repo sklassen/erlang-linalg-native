@@ -5,7 +5,7 @@
 -export([sum/1,norm/1]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
--define(EPSILON,1/1000000).
+-define(EPSILON,1.0e-12).
 -define(NA,na).
 
 % Arithmetric
@@ -13,7 +13,7 @@ exp(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
 
 log(M)->
-    sig1(M,fun(X)->math:exp(X) end,[]).
+    sig1(M,fun(X)->math:log(X) end,[]).
 
 sqrt(M)->
     sig1(M,fun(X)->math:sqrt(X) end,[]).
@@ -37,11 +37,15 @@ pow(M1,M2)->
     sig2(M1,M2,fun(A,B)->math:pow(A,B) end,[]).
 
 % Reductions
+norm(X) when is_number(X)->
+    X;
 norm([H|_]=Vector) when is_number(H)->
-    math:sqrt(sum(pow(Vector,2))).
+    math:sqrt(sum(pow(Vector,2)));
+norm([[H|_]|_]=Matrix) when is_number(H)->
+    norm(lists:flatten(Matrix)).
 
-sum(X) when is_number(X)->X;
 sum([])->0;
+sum(X) when is_number(X)->X;
 sum([H|_]=Vector) when is_number(H)->
     foldl(fun(A,Sum)->Sum+A end,0,Vector);
 sum([H|Tail])->
