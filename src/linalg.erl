@@ -236,7 +236,7 @@ roots(Vector)->
 
 -spec qr(matrix()) -> {matrix(),matrix()}.
 qr(RowWise)->
-   linalg_svd:qr(RowWise).
+   linalg_qr:qr(RowWise).
 
 -spec svd(matrix()) -> {matrix(),matrix(),matrix()}.
 svd(RowWise)->
