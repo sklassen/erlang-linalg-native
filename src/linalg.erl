@@ -5,14 +5,15 @@
 -import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
 
 -export([row/2,col/2,cell/3]). 
--export([transpose/1,det/1,inv/1,shape/1]). 
+-export([transpose/1,flipud/1,fliplr/1]). 
+-export([det/1,inv/1,shape/1]). 
 -export([dot/2,inner/2,outer/2,matmul/2,solve/2]). 
 -export([zeros/1,ones/1,sequential/1,random/1]).
 -export([zeros/2,ones/2,sequential/2,random/2]).
 -export([identity/1,diag/1,eye/1,eye/2]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
--export([sum/1,norm/1]).
+-export([sum/1,sumsq/1,norm/1]).
 -export([roots/1,qr/1,svd/1]).
 
 -define(EPSILON,1.0e-12).
@@ -105,35 +106,45 @@ transpose([[X]]) -> [[X]];
 transpose([[] | XXs]) -> transpose(XXs);
 transpose([[X | Xs] | XXs]) -> [[X | [H || [H | _Tail ] <- XXs]] | transpose([Xs | [Tail || [_|Tail] <- XXs]])].
 
-% Sum Product
+-spec flipud(matrix())->matrix().
+flipud(M)->
+    reverse(M).
+
+-spec fliplr(matrix())->matrix().
+fliplr(M)->
+    [reverse(R)||R<-M].
+
+% Sum Product (slower than inner, for big vectors, but succient)
 -spec dot(vector(),vector())->scalar().
-dot([],[],Sum) ->Sum;
-dot([A],[B],Sum) ->Sum+A*B;
-dot([A|VecA],[B|VecB],Sum) ->dot(VecA,VecB,Sum+A*B).
-dot(VecA,VecB) ->dot(VecA,VecB,0).
+dot(VecA,VecB) ->
+  foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,VecA,VecB)).
 
 % Matrix Multiplication
 -spec matmul(matrix(),matrix())->matrix().
 matmul(M1 = [H1|_], M2) when length(H1) =:= length(M2) ->
     matmul(M1, transpose(M2), []).
-
-matmul([], _, R) -> lists:reverse(R);
+matmul([], _, R) -> 
+    lists:reverse(R);
 matmul([Row|Rest], M2, R) ->
     matmul(Rest, M2, [outer(Row, M2)|R]).
 
-inner(V1,V2)->
-    dot(V1,V2).
+-spec inner(vector(),vector())->scalar().
+inner([],[],Sum) ->
+    Sum;
+inner([A],[B],Sum) ->
+    Sum+A*B;
+inner([A|VecA],[B|VecB],Sum) ->
+    inner(VecA,VecB,Sum+A*B).
+inner(VecA,VecB) ->
+    inner(VecA,VecB,0).
 
+-spec outer(vector(),vector())->matrix().
 outer(V1,V2)->
     outer(V1,V2,[]).
-outer(_, [], R) -> lists:reverse(R);
+outer(_, [], R) -> 
+    lists:reverse(R);
 outer(Row, [Col|Rest], R) ->
-    outer(Row, Rest, [dot(Row, Col)|R]).
-
-% Note: much slower but succient. 
-% matmul_zipwith(M1,M2) -> 
-%   [ [ foldl(fun(X,Sum)->Sum+X end,0,lists:zipwith(fun(X,Y)->X*Y end,A,B))|| A <- transpose(M1) ]|| B <- M2 ].
-
+    outer(Row, Rest, [inner(Row, Col)|R]).
 
 % Arithmetric
 exp(M)->
@@ -174,9 +185,16 @@ norm([[H|_]|_]=Matrix) when is_number(H)->
 sum([])->0;
 sum(X) when is_number(X)->X;
 sum([H|_]=Vector) when is_number(H)->
-    foldl(fun(A,Sum)->Sum+A end,0,Vector);
+    foldl(fun(X,Sum)->Sum+X end,0,Vector);
 sum([H|Tail])->
     sum(H)+sum(Tail).
+
+sumsq([])->0;
+sumsq(X) when is_number(X)->X*X;
+sumsq([H|_]=Vector) when is_number(H)->
+    foldl(fun(X,Sum)->Sum+X*X end,0,Vector);
+sumsq([H|Tail])->
+    sumsq(H)+sumsq(Tail).
 
 % Reference
 -spec row(dim(),matrix())->vector().
