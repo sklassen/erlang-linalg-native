@@ -2,7 +2,7 @@
 -vsn('1.0').
 -author('simon.klassen').
 -import(linalg,[shape/1,transpose/1,eye/1,matmul/2,norm/1,sub/2,mul/2,divide/2]).
--import(lists,[reverse/1,merge/1,merge/2,nth/2,nthtail/2,split/2]).
+-import(lists,[reverse/1,merge/1,merge/2,nth/2,nthtail/2,split/2,keyreplace/4]).
 -export([svd/1]).
 
 -type scalar() :: number().
@@ -17,45 +17,62 @@ svd(_Matrix,{M,N}) when N>M ->
    {error,"Need more rows than columns"};
 
 svd(U,{M,N})->
-   Lhs = [0.0 || _ <- lists:seq(1,N)],
-   Rhs = [0.0 || _ <- lists:seq(1,N)],
-   svd(0,{M,N},0,{Lhs,Rhs},U).
+   Lhs = [{I,0.0} || I <- lists:seq(0,N-1)],
+   Rhs = [{I,0.0} || I <- lists:seq(0,N-1)],
+   svd(0,{M,N},{Lhs,Rhs},U).
 
-svd(I,{M,N},PreG,{Lhs,Rhs},U) when I<(N-1) ->
-   io:format("Matrix (~p) ~p (G=~p)~n",[I,U,PreG]),
-   {QHead,[_Q|QTail]}=split(I,Lhs),
-   {EHead,[_E|ETail]}=split(I,Rhs),
+svd(I,{M,N},{Lhs,Rhs},U) when I<(N-1) ->
+   %io:format("Matrix (~p) ~p (G=~p)~n",[I,U,PreG]),
    {Top,Left,[[MCell|MHead]|Minor]}=minor(I,U),
-   [C|Col]=[X||[X|_]<-[[MCell|MHead]|Minor]],
 
-   {NewF,NewG,NewH}=fgh([C|Col]),
-   NewHead=[(NewF-NewG)|MHead],
-   %io:format("NewMinor ~p ~p~n",[NewH,Minor]),
-   NewMinor=newaxis1(NewH,[NewHead|Minor]),
-   %io:format("NewMinor ~p~n",[NewMinor]),
+   % Axis 1
+   Vector1=[X||[X|_]<-[[MCell|MHead]|Minor]],
+   {NewF,NewG,NewH}=fgh(Vector1),
+   NewVector=[(NewF-NewG)|MHead],
+   NewMinor=newaxis1(NewH,[NewVector|Minor]),
 
+   % Axis 2
    [[Scalar2|Vector2]|Minor2]=NewMinor,
    {NextF,NextG,NextH}=fgh(Vector2),
    [_|VTail]=Vector2,
-   Vector3=[Scalar2]++[NextF-NextG]++VTail,
-   %io:format("New One ~p~n",[Vector3]),
+   NextVector=[Scalar2]++[NextF-NextG]++VTail,
+   [_|NextMinor]=newaxis2(NextH,[NextVector|Minor2]),
 
-   %io:format("New Matrix~p~n",[[Vector3|Minor2]]),
-   [_|NewAxis]=newaxis2(NextH,[Vector3|Minor2]),
-   %io:format("New Axis ~p~n",[NewAxis]),
+   NewLhs=keyreplace(I,1,Lhs,{I,NewG}),
+   NewRhs=keyreplace(I+1,1,Rhs,{I+1,NextG}),
+   NewU=major({Top,Left,[NextVector|NextMinor]}),
+   
+   svd(I+1,{M,N},{NewLhs,NewRhs},NewU);
 
-   NewLhs=QHead++[NewG|QTail],
-   NewRhs=EHead++[PreG|ETail],
-   NewU=major({Top,Left,[Vector3|NewAxis]}),
-   %io:format("U=~p~n",[NewU]),
-   %io:format("E=~p~n",[NewE]),
-   %io:format("Q=~p~n",[NewQ]),
-   svd(I+1,{M,N},NextG,{NewLhs,NewRhs},NewU);
+svd(I,{M,N},{Lhs,Rhs},U) when I==(N-1) ->
+   io:format("U=~p~n",[U]),
+   io:format("L=~p~n",[Lhs]),
+   io:format("R=~p~n",[Rhs]),
+   Left=[L||{_,L}<-Lhs],
+   Right=[R||{_,R}<-Rhs],
 
-svd(I,{_,N},G,{Lhs,Rhs},U) when I==(N-1) ->
-   {EHead,[_E|ETail]}=split(I,Rhs),
-   NewRhs=EHead++[G|ETail],
-   {U,Lhs,NewRhs}.
+   io:format("Right=~p~n",[right(Right,{M,N},U)]),
+   {U,[L||{_,L}<-Lhs],[R||{_,R}<-Rhs]}.
+
+right(Eigens,{M,N},U)->
+   right(reverse(Eigens),{M,N},U,[[1]]).
+right([_],{_,_},_,Vt)->
+   Vt;
+right([0.0|Tail],{M,N},U,Vt)->
+   right(Tail,{M,N},U,pad(Vt));
+right([E|Tail],{M,N},U,Vt)->
+   I=length(Tail),
+   {_,_,Minor}=minor(I,U),
+   io:format("Minor=~pth ~p~n",[I,Minor]),
+   io:format("U=~pth ~p~n",[I,U]),
+   H=E*linalg:cell(I,I+1,U),
+   io:format("H=~p ~p = ~p~n",[I,linalg:cell(I,I+1,U),H]),
+   right(Tail,{M,N},U,pad(Vt)).
+
+pad(M)->
+   Top=[1|[0||_<-lists:seq(1,length(M))]],
+   Bottom=[[0|Row]||Row<-M],
+   [Top|Bottom].
 
 fgh([])->{0,0,0};
 fgh([F|List])->
@@ -85,20 +102,15 @@ newaxis1(H,Matrix) ->
 newaxis2(_,[[X]]) ->
    [[X]];
 newaxis2(H,Matrix) ->
-   %io:format("newaxis inner ~p~n",[Matrix]),
-   %io:format("newaxix minor0 ~p~n",[minor(1,Matrix)]),
    {[[Scalar|Vector]],Left,Minor}=minor(1,Matrix),
-   %io:format("newaxis minor~p~n",[[Vector|Minor]]),
    [_|NewMinor]=scaleaxis(H,[Vector|Minor]),
-   %io:format("newaxis output ~p~n",[NewMinor]),
    major({[[Scalar|Vector]],Left,NewMinor}).
 
 scaleaxis(H,[Vec|Matrix]) ->
    [Vec|scaleaxis(Matrix,H,Vec,[])].
 scaleaxis([Col|Tail],H,Vec,Acc) ->
    %io:format("scaleaxis ~p ~p = ~p~n",[Col,Vec,lists:zip(Col,Vec)]),
-   S=linalg:dot(Col,Vec),
-   F = S/H,
+   F=linalg:dot(Col,Vec)/H,
    %io:format("S ~p~n",[S]),
    %io:format("H ~p~n",[H]),
    %io:format("F ~p~n",[F]),
@@ -108,10 +120,10 @@ scaleaxis([],_,_,Acc) ->
    reverse(Acc).
 
 
-pythag(_,0) ->
-        0;
-pythag(X,Y) ->
-   case {abs(X),abs(Y)} of
-           {A,B} when A>B -> A*math:sqrt(1+(B*B/A/A));
-           {A,B} when A=<B -> B*math:sqrt(1+(A*A/B/B))
-   end.
+%pythag(_,0) ->
+%       0;
+%pythag(X,Y) ->
+%   case {abs(X),abs(Y)} of
+%           {A,B} when A>B -> A*math:sqrt(1+(B*B/A/A));
+%           {A,B} when A=<B -> B*math:sqrt(1+(A*A/B/B))
+%   end.

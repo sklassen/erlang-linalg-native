@@ -202,11 +202,14 @@ row(I,Matrix) when I>0 ->
     [nth(I,Matrix)];
 row(I,Matrix) when I<0 ->
     {A,[_|B]}=split(-(I+1),Matrix),
-    append(A,B).
+    A++B.
 
 -spec col(dim(),matrix())->vector().
-col(J,Matrix) ->
-    transpose(row(J,transpose(Matrix))).
+col(J,Matrix) when J>0 ->
+    [nth(J,Row)||Row<-Matrix];
+col(J,Matrix) when J<0 ->
+    Colbind=fun({A,[_|B]})->A++B end,
+    [ Colbind(split(-(J+1),Row)) ||Row<-Matrix].
 
 -spec cell(dim(),dim(),matrix())->vector().
 cell(I,J,Matrix) ->
@@ -216,10 +219,23 @@ cell(I,J,Matrix) ->
 -spec det(matrix())->scalar().
 det([[X]])->
     X;
+
+% well known 2x2
 det([[A,B],[C,D]])->
     A*D-B*C;
+
+% rule of sarrus 3x3 and extention 4x4 (speeds up processing by 2x 3x for larger matrix)
+det([[A,B,C],[D,E,F],[G,H,I]])->
+    A*E*I + B*F*G + C*D*H - C*E*G - B*D*I - A*F*H;
+
+det([[A,B,C,D],[E,F,G,H],[I,J,K,L],[M,N,O,P]])->
+      A*F*K*P - A*F*L*O - A*G*J*P + A*G*L*N + A*H*J*O - A*H*K*N - B*E*K*P + B*E*L*O 
+    + B*G*I*P - B*G*L*M - B*H*I*O + B*H*K*M + C*E*J*P - C*E*L*N - C*F*I*P + C*F*L*M 
+    + C*H*I*N - C*H*J*M - D*E*J*O + D*E*K*N + D*F*I*O - D*F*K*M - D*G*I*N + D*G*J*M;
+
+% laplace
 det([H|Tail])->
-    foldl(fun(A,Sum)->Sum+A end,0,[pow(-1,J-1)*X*det(col(-J,Tail))||{J,X}<-zip(seq(1,length(H)),H)]).
+    sum([pow(-1,J-1)*X*det(col(-J,Tail))||{J,X}<-zip(seq(1,length(H)),H)]).
 
 -spec solve(matrix(),matrix())->matrix().
 solve(X,B)->
