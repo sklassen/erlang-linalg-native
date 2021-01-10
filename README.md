@@ -1,17 +1,30 @@
 Erlang Native Matrix Functions
 ============================
 
-This is an native Erlang linear algebra library (linalg)
+This is an native Erlang linear algebra library (linalg). 
+The function signatures and results strive to match numpy and scipy linalg.
+
+The are also erlang-linalg NIF libraries avalible that match in function 
+names, signature and results. This is the native version is slower than
+those NIFs. This code was written to be readable and (maybe) teachable rather
+than fast.
+
+Suggestions, enhancements and pull-requests welcomed. 
 
 # Installation
------
 
-Then, in the top directory, compile using rebar
+There are no dependancies. In the top directory, compile using rebar.
 
 > rebar compile
 
+To include it as a rebar.config dependancy, add the line below.
+```
+{deps,[
+    {linalg, ".*", {git, "https://github.com/sklassen/erlang-linalg-native.git"}}
+]}
+```
+
 # Functions
------
 
 Creation and Description
  - shape(m)
@@ -57,25 +70,24 @@ Matrix Reduction
  - norm(m)
 
 # Usage
------
 
-These are a few examples. See the tests directory for more examples.
+Below are a few examples. See the tests directory for more examples.
+```
+Erlang R16B03 (erts-5.10.4) [source] [64-bit] 
 
-	Erlang R16B03 (erts-5.10.4) [source] [64-bit] 
+Eshell V5.10.4  (abort with ^G)
 
-	Eshell V5.10.4  (abort with ^G)
+1> linalg:dot([1.0,2.0],[3.0,4.0]).
 
-	1> linalg:dot([1.0,2.0],[3.0,4.0]).
+1> linalg:transpose([[1.0,2.0],[3.0,4.0]]).
 
-	1> linalg:transpose([[1.0,2.0],[3.0,4.0]]).
+1> linalg:matmul([[1.0,2.0],[3.0,4.0]],[[1.0,2.0,3.0],[4.0,5.0,6.0]]).
 
-	1> linalg:matmul([[1.0,2.0],[3.0,4.0]],[[1.0,2.0,3.0],[4.0,5.0,6.0]]).
-
-    1> linalg:mul([1,2,3],[4,5,6]).
+1> linalg:mul([1,2,3],[4,5,6]).
     
-    1> linalg:add(10,[[1,2,3],[4,5,6]]).
+1> linalg:add(10,[[1,2,3],[4,5,6]]).
+```
 
+# License
 
-License
------
 This project is licensed under the terms of the GNU General Public License v3.0	
