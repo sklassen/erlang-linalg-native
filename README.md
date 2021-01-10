@@ -21,7 +21,7 @@ Creation and Description
  - sequential(i); sequential(i,j)
  - random(i); random(i,j)
  - eye(i); eye(i,j)
- - indentity(v)
+ - identity(v)
  - diag(v); diag(m)
 
 Matrix and Vector
@@ -34,7 +34,6 @@ Matrix and Vector
 Decomposition
  - qr(m) (for square matrix)
  - roots(v) (upto third order)
- # svd (under development)
 
 Norms and others
  - norm(a)
@@ -54,7 +53,8 @@ Basic Scalar, Vector and Matrix Arithmetric
  - log(m)
 
 Matrix Reduction
- - sum, norm
+ - sum(m)
+ - norm(m)
 
 # Usage
 -----

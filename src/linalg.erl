@@ -2,7 +2,7 @@
 -vsn('1.0').
 -author('simon.klassen').
 
--import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
+-import(lists,[reverse/1,nth/2,seq/2,split/2,zip/2,foldl/3]).
 
 -export([row/2,col/2,cell/3]). 
 -export([transpose/1,flipud/1,fliplr/1]). 
@@ -14,7 +14,7 @@
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
 -export([sum/1,sumsq/1,norm/1]).
--export([roots/1,qr/1,svd/1]).
+-export([roots/1,qr/1]).
 
 -define(EPSILON,1.0e-12).
 -define(NA,na).
@@ -271,10 +271,6 @@ roots(Vector)->
 -spec qr(matrix()) -> {matrix(),matrix()}.
 qr(RowWise)->
    linalg_qr:qr(RowWise).
-
--spec svd(matrix()) -> {matrix(),matrix(),matrix()}.
-svd(RowWise)->
-   linalg_svd:svd(RowWise).
 
 
 % private arithmetic functions
