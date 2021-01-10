@@ -213,7 +213,7 @@ col(J,Matrix) when J<0 ->
 
 -spec cell(dim(),dim(),matrix())->vector().
 cell(I,J,Matrix) ->
-    nth(J,nth(1,row(I,Matrix))).
+    nth(J,nth(I,Matrix)).
 
 % Solves
 -spec det(matrix())->scalar().
