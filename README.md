@@ -33,6 +33,7 @@ Creation and Description
  - ones(i); ones(i,j)
  - sequential(i); sequential(i,j)
  - random(i); random(i,j)
+ - fill(i,value); fill(i,j,value)
  - eye(i); eye(i,j)
  - identity(v)
  - diag(v); diag(m)

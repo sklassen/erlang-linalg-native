@@ -10,6 +10,7 @@
 -export([dot/2,inner/2,outer/2,matmul/2,solve/2]). 
 -export([zeros/1,ones/1,sequential/1,random/1]).
 -export([zeros/2,ones/2,sequential/2,random/2]).
+-export([fill/2,fill/3]).
 -export([identity/1,diag/1,eye/1,eye/2]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
@@ -37,34 +38,48 @@ shape([[X|_]|_]=Matrix) when is_number(X)->
 % generation (vector)
 -spec zeros(dim())->vector().
 zeros(0) -> 
-    [[]];
+    [];
 zeros(N) -> 
 	[ 0.0 ||_<-seq(1,N)].
 
 -spec ones(dim())->vector().
 ones(0) -> 
-    [[]];
+    [];
 ones(N) -> 
 	[ 1.0 ||_<-seq(1,N)].
 
 -spec sequential(dim())->vector().
 sequential(0) ->
-    [[]];
+    [];
 sequential(N) ->
 	[ X||X<-seq(1,N)].
 
 -spec random(dim())->vector().
 random(0) ->
-    [[]];
+    [];
 random(N) ->
 	[ rand:uniform() ||_<-seq(1,N)].
 
+-spec fill(dim(),scalar())->vector().
+fill(0, _) ->
+    [];
+fill(N, Value) ->
+	[ Value ||_<-seq(1,N)].
+
 % generation (matrix)
 -spec zeros(dim(),dim())->matrix().
+zeros(0,_) ->
+    [[]];
+zeros(_,0) ->
+    [[]];
 zeros(NR,NC) ->
 	[ [ 0 || _<-seq(1,NC)] || _<-seq(1,NR)].
 
 -spec ones(dim(),dim())->matrix().
+ones(0,_) ->
+    [[]];
+ones(_,0) ->
+    [[]];
 ones(NR,NC) ->
 	[ [ 1 || _<-seq(1,NC)] || _<-seq(1,NR)].
 
@@ -75,6 +90,14 @@ sequential(NR,NC) ->
 -spec random(dim(),dim())->matrix().
 random(NR,NC) ->
 	[ [ rand:uniform() || _<-seq(1,NC)] || _<-seq(1,NR)].
+
+-spec fill(dim(),dim(),scalar())->matrix().
+fill(0,_,_) ->
+    [[]];
+fill(_,0,_) ->
+    [[]];
+fill(NR,NC,Value) ->
+	[ fill(NC,Value) || _<-seq(1,NR)].
 
 -spec eye(dim())->matrix().
 eye(0)->
