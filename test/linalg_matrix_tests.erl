@@ -1,4 +1,5 @@
--module(linalg_matrix_tests). 
+-module(linalg_matrix_tests).
+-import(linalg,[zeros/1,zeros/2,ones/1,ones/2]).
 -import(linalg,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -42,3 +43,24 @@ inv_2_test()->
 inv_3_test()->
 	?assert(inv([[1,0,1],[0,2,1],[1,1,1]])==[[-1.0,-1.0,2.0],[-1.0,0.0,1.0],[2.0,1.0,-2.0]]).
 
+zeros_test()->
+    [
+    ?assert(zeros(0) == []),
+    ?assert(zeros(2) == [0,0]),
+    ?assert(zeros(0,0) == [[]]),
+    ?assert(zeros(1,0) == [[]]),
+    ?assert(zeros(0,2) == [[]]),
+    ?assert(zeros(1,1) == [[0]]),
+    ?assert(zeros(2,3) == [[0,0,0],[0,0,0]])
+    ].
+
+ones_test()->
+    [
+    ?assert(ones(0) == []),
+    ?assert(ones(2) == [1,1]),
+    ?assert(ones(0,0) == [[]]),
+    ?assert(ones(1,0) == [[]]),
+    ?assert(ones(0,2) == [[]]),
+    ?assert(ones(1,1) == [[1]]),
+    ?assert(ones(2,3) == [[1,1,1],[1,1,1]])
+    ].

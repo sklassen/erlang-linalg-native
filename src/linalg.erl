@@ -37,34 +37,42 @@ shape([[X|_]|_]=Matrix) when is_number(X)->
 % generation (vector)
 -spec zeros(dim())->vector().
 zeros(0) -> 
-    [[]];
+    [];
 zeros(N) -> 
 	[ 0.0 ||_<-seq(1,N)].
 
 -spec ones(dim())->vector().
 ones(0) -> 
-    [[]];
+    [];
 ones(N) -> 
 	[ 1.0 ||_<-seq(1,N)].
 
 -spec sequential(dim())->vector().
 sequential(0) ->
-    [[]];
+    [];
 sequential(N) ->
 	[ X||X<-seq(1,N)].
 
 -spec random(dim())->vector().
 random(0) ->
-    [[]];
+    [];
 random(N) ->
 	[ rand:uniform() ||_<-seq(1,N)].
 
 % generation (matrix)
 -spec zeros(dim(),dim())->matrix().
+zeros(0,_) ->
+    [[]];
+zeros(_,0) ->
+    [[]];
 zeros(NR,NC) ->
 	[ [ 0 || _<-seq(1,NC)] || _<-seq(1,NR)].
 
 -spec ones(dim(),dim())->matrix().
+ones(0,_) ->
+    [[]];
+ones(_,0) ->
+    [[]];
 ones(NR,NC) ->
 	[ [ 1 || _<-seq(1,NC)] || _<-seq(1,NR)].
 
