@@ -62,11 +62,11 @@ right([0.0|Tail],{M,N},U,Vt)->
    right(Tail,{M,N},U,pad(Vt));
 right([E|Tail],{M,N},U,Vt)->
    I=length(Tail),
-   {_,_,Minor}=minor(I,U),
-   io:format("Minor=~pth ~p~n",[I,Minor]),
+   {Top,Bottom,Minor}=minor(I,U),
+   io:format("Minor=~pth ~p ~p ~p~n",[I,Top,Bottom,Minor]),
    io:format("U=~pth ~p~n",[I,U]),
    H=E*linalg:cell(I,I+1,U),
-   io:format("H=~p ~p = ~p~n",[I,linalg:cell(I,I+1,U),H]),
+   io:format("H=~p x ~p = ~p~n",[I,linalg:cell(I,I+1,U),H]),
    right(Tail,{M,N},U,pad(Vt)).
 
 pad(M)->
