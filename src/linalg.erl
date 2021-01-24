@@ -1,8 +1,8 @@
 -module(linalg). 
--vsn('1.0').
+-vsn('1.0.1').
 -author('simon.klassen').
 
--import(lists,[reverse/1,nth/2,seq/2,split/2,zip/2,foldl/3]).
+-import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
 
 -export([row/2,col/2,cell/3]). 
 -export([transpose/1,flipud/1,fliplr/1]). 
@@ -14,8 +14,9 @@
 -export([identity/1,diag/1,eye/1,eye/2]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
--export([sum/1,sumsq/1,norm/1]).
+-export([sum/1,sumsq/1,prod/1,norm/1]).
 -export([roots/1,qr/1]).
+-export([min/1,max/1]).
 
 -define(EPSILON,1.0e-12).
 -define(NA,na).
@@ -40,13 +41,13 @@ shape([[X|_]|_]=Matrix) when is_number(X)->
 zeros(0) -> 
     [];
 zeros(N) -> 
-	[ 0.0 ||_<-seq(1,N)].
+	[ 0 ||_<-seq(1,N)].
 
 -spec ones(dim())->vector().
 ones(0) -> 
     [];
 ones(N) -> 
-	[ 1.0 ||_<-seq(1,N)].
+	[ 1 ||_<-seq(1,N)].
 
 -spec sequential(dim())->vector().
 sequential(0) ->
@@ -64,7 +65,7 @@ random(N) ->
 fill(0, _) ->
     [];
 fill(N, Value) ->
-	[ Value ||_<-seq(1,N)].
+    [ Value ||_<-seq(1,N)].
 
 % generation (matrix)
 -spec zeros(dim(),dim())->matrix().
@@ -73,7 +74,7 @@ zeros(0,_) ->
 zeros(_,0) ->
     [[]];
 zeros(NR,NC) ->
-	[ [ 0 || _<-seq(1,NC)] || _<-seq(1,NR)].
+    [ [ 0 || _<-seq(1,NC)] || _<-seq(1,NR)].
 
 -spec ones(dim(),dim())->matrix().
 ones(0,_) ->
@@ -97,7 +98,7 @@ fill(0,_,_) ->
 fill(_,0,_) ->
     [[]];
 fill(NR,NC,Value) ->
-	[ fill(NC,Value) || _<-seq(1,NR)].
+    [ fill(NC,Value) || _<-seq(1,NR)].
 
 -spec eye(dim())->matrix().
 eye(0)->
@@ -107,16 +108,16 @@ eye(N)->
 
 -spec eye(dim(),dim())->matrix().
 eye(N,M) ->
-      [ [ case {R,C} of {C,R} -> 1.0; _->0.0 end||R<-seq(1,M)] || C<-seq(1,N)].
+    [[case {R,C} of {C,R}->1; {R,C}->0 end||R<-seq(1,M)] || C<-seq(1,N)].
 
 -spec diag(vector()|matrix())->matrix()|vector().
 % (V)ector V->M
 diag([X|_]=V) when is_number(X)->
-	[ [ case R of C -> nth(R,V); _->0.0 end||R<-seq(1,length(V))] || C<-seq(1,length(V))];
+	[[ case R of C -> nth(R,V); _->0 end||R<-seq(1,length(V))] || C<-seq(1,length(V))];
 
 % (M)atrix M->V
 diag([[X|_]|_]=M) when is_number(X)->
-	[ nth(R,nth(R,M))||R<-seq(1,length(M))].
+	[nth(R,nth(R,M))||R<-seq(1,length(M))].
 
 -spec identity(dim())->matrix().
 identity(N) ->
@@ -124,18 +125,22 @@ identity(N) ->
 
 % Transformation
 -spec transpose(matrix())->matrix().
-transpose([[]]) -> [];
-transpose([[X]]) -> [[X]];
-transpose([[] | XXs]) -> transpose(XXs);
-transpose([[X | Xs] | XXs]) -> [[X | [H || [H | _Tail ] <- XXs]] | transpose([Xs | [Tail || [_|Tail] <- XXs]])].
+transpose([[]]) -> 
+    [];
+transpose([[X]]) -> 
+    [[X]];
+transpose([[] | Rows]) -> 
+    transpose(Rows);
+transpose([[X | Xs] | Rows]) -> 
+    [[X|[H||[H|_]<-Rows]]|transpose([Xs|[Tail||[_|Tail]<-Rows]])].
 
 -spec flipud(matrix())->matrix().
 flipud(M)->
-    reverse(M).
+   reverse(M).
 
 -spec fliplr(matrix())->matrix().
 fliplr(M)->
-    [reverse(R)||R<-M].
+   [reverse(R)||R<-M].
 
 % Sum Product (slower than inner, for big vectors, but succient)
 -spec dot(vector(),vector())->scalar().
@@ -198,6 +203,31 @@ pow(M1,M2)->
     sig2(M1,M2,fun(A,B)->math:pow(A,B) end,[]).
 
 % Reductions
+sum(X) when is_number(X)->X;
+sum(Xs) ->
+    reduction(Xs,fun(X,Sum)->Sum+X end,0).
+
+sumsq(X) when is_number(X)->X*X;
+sumsq(Xs)->
+    reduction(Xs,fun(X,SumSq)->SumSq+X*X end,0).
+
+prod(X) when is_number(X)->X;
+prod(Xs)->
+    reduction(Xs,fun(X,Acc)->Acc*X end,1).
+
+min(X) when is_number(X)->X;
+min([H|Vector]) when is_number(H)->
+    lists:foldl(fun(X,Min)->erlang:min(X,Min) end,H,Vector);
+min([H|Tail])->
+    min(lists:flatten([H|Tail])).
+
+max(X) when is_number(X)->X;
+max([H|Vector]) when is_number(H)->
+    lists:foldl(fun(X,Max)->erlang:max(X,Max) end,H,Vector);
+max([H|Tail])->
+    max(lists:flatten([H|Tail])).
+
+
 norm(X) when is_number(X)->
     X;
 norm([H|_]=Vector) when is_number(H)->
@@ -205,38 +235,28 @@ norm([H|_]=Vector) when is_number(H)->
 norm([[H|_]|_]=Matrix) when is_number(H)->
     norm(lists:flatten(Matrix)).
 
-sum([])->0;
-sum(X) when is_number(X)->X;
-sum([H|_]=Vector) when is_number(H)->
-    foldl(fun(X,Sum)->Sum+X end,0,Vector);
-sum([H|Tail])->
-    sum(H)+sum(Tail).
-
-sumsq([])->0;
-sumsq(X) when is_number(X)->X*X;
-sumsq([H|_]=Vector) when is_number(H)->
-    foldl(fun(X,Sum)->Sum+X*X end,0,Vector);
-sumsq([H|Tail])->
-    sumsq(H)+sumsq(Tail).
-
 % Reference
--spec row(dim(),matrix())->vector().
+-spec row(dim(),matrix())->vector()|matrix().
+row(0,_)->
+    [];
 row(I,Matrix) when I>0 ->
-    [nth(I,Matrix)];
+    nth(I,Matrix);
 row(I,Matrix) when I<0 ->
     {A,[_|B]}=split(-(I+1),Matrix),
-    A++B.
+    append(A,B).
 
--spec col(dim(),matrix())->vector().
+-spec col(dim(),matrix())->vector()|matrix().
+col(0,_)->
+    [];
 col(J,Matrix) when J>0 ->
     [nth(J,Row)||Row<-Matrix];
 col(J,Matrix) when J<0 ->
-    Colbind=fun({A,[_|B]})->A++B end,
+    Colbind=fun({A,[_|B]})->append(A,B) end,
     [ Colbind(split(-(J+1),Row)) ||Row<-Matrix].
 
--spec cell(dim(),dim(),matrix())->vector().
+-spec cell(dim(),dim(),matrix())->scalar().
 cell(I,J,Matrix) ->
-    nth(J,nth(I,Matrix)).
+    nth(J,nth(1,row(I,Matrix))).
 
 % Solves
 -spec det(matrix())->scalar().
@@ -247,7 +267,8 @@ det([[X]])->
 det([[A,B],[C,D]])->
     A*D-B*C;
 
-% rule of sarrus 3x3 and extention 4x4 (speeds up processing by 2x 3x for larger matrix)
+% rule of sarrus 3x3 and extention 4x4 
+% (speeds up processing by 2x 3x for larger matrix)
 det([[A,B,C],[D,E,F],[G,H,I]])->
     A*E*I + B*F*G + C*D*H - C*E*G - B*D*I - A*F*H;
 
@@ -329,3 +350,9 @@ sig2([R1|M1],B,Fun,Acc) when is_number(B)->
 sig2([R1|M1],[R2|M2],Fun,Acc)->
             sig2(M1,M2,Fun,[[Fun(A,B)||{A,B}<-zip(R1,R2)]|Acc]).
 
+reduction([],_Fun,Init)->
+    Init;
+reduction([X|_]=Vector,Fun,Init) when is_number(X)->
+    foldl(Fun,Init,Vector);
+reduction([V|_]=Matrix,Fun,Init) when is_list(V) ->
+    reduction(lists:flatten(Matrix),Fun,Init).
