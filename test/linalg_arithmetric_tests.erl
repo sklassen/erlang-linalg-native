@@ -1,5 +1,5 @@
 -module(linalg_arithmetric_tests). 
--import(linalg,[exp/1,log/1,norm/1,mul/2,add/2]).
+-import(linalg,[exp/1,log/1,mul/2,add/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 exp_s_test() ->
@@ -15,13 +15,6 @@ log_v_test() ->
 	?assert(log([1,2,3])==[math:log(X)||X<-[1,2,3]]).
 log_m_test() ->
 	?assert(log([[1,2,3],[1,2,3]])==[[math:log(X)||X<-[1,2,3]]||_<-[1,2]]).
-
-norm_s_test() ->
-	?assertEqual(1,norm(1)).
-norm_v_test() ->
-	?assertEqual(math:sqrt(14),norm([1,2,3])).
-norm_m_test() ->
-	?assertEqual(math:sqrt(28),norm([[1,2,3],[1,2,3]])).
 
 mul_sxs_test() ->
 	?assert(mul(10,10)==100).
