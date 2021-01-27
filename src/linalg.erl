@@ -15,7 +15,7 @@
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
 -export([sum/1,sumsq/1,prod/1,norm/1]).
--export([roots/1,qr/1]).
+-export([roots/1,qr/1,cholesky/1]).
 -export([min/1,max/1]).
 
 -define(EPSILON,1.0e-12).
@@ -311,6 +311,10 @@ cofactors(Matrix)->
 -spec roots(vector()) -> vector().
 roots(Vector)->
    linalg_roots:roots(Vector).
+
+-spec cholesky(matrix()) -> matrix().
+cholesky(RowWise)->
+    linalg_cholesky:crout(RowWise).
 
 -spec qr(matrix()) -> {matrix(),matrix()}.
 qr(RowWise)->

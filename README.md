@@ -47,6 +47,7 @@ Matrix and Vector
 
 Decomposition
  - qr(m) (for square matrix)
+ - cholesky(m)
  - roots(v) (upto third order)
 
 Norms and others

@@ -1,5 +1,5 @@
 -module(linalg_cholesky_tests). 
--import(linalg_cholesky,[cholesky/1]).
+-import(linalg,[cholesky/1]).
 -include_lib("eunit/include/eunit.hrl").
 
 cholesky_1x1_test() ->
