@@ -307,6 +307,7 @@ median_([_|Tail])->
 std(X)->
    math:sqrt(var(X)).
 
+-spec var(vector())->scalar().
 var(X) when is_number(X)->0;
 var([X]) when is_number(X)->0;
 var([X|Xs]) when is_number(X)->
@@ -325,15 +326,19 @@ welford([H|Tail],{Mean,SumSq,N})->
     NewSumSq=SumSq+D1*D2,
     welford(Tail,{NewMean,NewSumSq,N+1}).
 
+-spec cov(vector(),vector())->matrix().
 cov([X],[Y]) when is_number(X) andalso is_number(Y) ->
-    0;
+    [[?NA,?NA],[?NA,?NA]];
 cov([X|Xs],[Y|Ys]) when is_number(X) andalso is_number(Y) ->
-    cov(Xs,Ys,{X,Y,0,0,0,1}).
+    cov(Xs,Ys,{X,Y,0,0,0,0,0,1}).
 
-cov([],[],{_X0,_Y0,DX,DY,DXY,N})->
-    (DXY-DX*DY/N)/(N-1);
-cov([X|XTail],[Y|YTail],{X0,Y0,DX,DY,DXY,N})->
-    cov(XTail,YTail,{X0,Y0,DX+(X-X0),DY+(Y-Y0),DXY+(X-X0)*(Y-Y0),N+1}).
+cov([],[],{_X0,_Y0,DX,DXX,DY,DYY,DXY,N})->
+    XX=(DXX-DX*DX/N)/(N-1),
+    YY=(DYY-DY*DY/N)/(N-1),
+    XY=(DXY-DX*DY/N)/(N-1),
+    [[XX,XY],[XY,YY]];
+cov([X|XTail],[Y|YTail],{X0,Y0,DX,DXX,DY,DYY,DXY,N})->
+    cov(XTail,YTail,{X0,Y0,DX+(X-X0),DXX+(X-X0)*(X-X0),DY+(Y-Y0),DYY+(Y-Y0)*(Y-Y0),DXY+(X-X0)*(Y-Y0),N+1}).
 
 % Solves
 -spec det(matrix())->scalar().
