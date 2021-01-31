@@ -279,6 +279,7 @@ argmax({_,_},{K,Max}) ->
     {K,Max}.
 
 
+norm(X) when is_number(X)->X;
 norm(X)->
    math:sqrt(sumsq(X)).
 
