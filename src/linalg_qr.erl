@@ -1,7 +1,6 @@
 -module(linalg_qr).
 -vsn('1.0').
 -author('simon.klassen').
--import(linalg,[transpose/1,eye/1,matmul/2,norm/1,sub/2,mul/2,divide/2]).
 -export([qr/1]).
 
 -type scalar() :: number().
@@ -21,30 +20,24 @@
 
 -spec householder(matrix()) -> {matrix(),matrix()}.
 householder(ColumnWise)->
-    householder(ColumnWise,{eye(length(ColumnWise)),ColumnWise}).
+    householder(ColumnWise,{linalg:eye(length(ColumnWise)),ColumnWise}).
 
 -spec householder(matrix(),{matrix(),matrix()}) -> {matrix(),matrix()}.
 householder([[_]],{QMatrix,RMatrix})->
-    {QMatrix,transpose(RMatrix)};
+    {QMatrix,linalg:transpose(RMatrix)};
 
 householder(Matrix,{QMatrix,RMatrix})->
-    %N=1+length(QMatrix)-length(Matrix),
-    %io:format("A~p:~p~n",[N,Matrix]),
     HMatrix=hmatrix(Matrix),
-    %io:format("H~p:~p~n",[N,HMatrix]),
     NewQ=pad(HMatrix,length(QMatrix)-length(HMatrix)),
-    %io:format("P~p:~p~n",[N,NewQ]),
-    Minor=minor(matmul(Matrix,HMatrix)),
-    %io:format("Q~p:~p~n",[N,matmul(QMatrix,NewQ)]),
-    %io:format("R~p:~p~n",[N,matmul(RMatrix,NewQ)]),
-    householder(Minor,{matmul(QMatrix,NewQ),matmul(RMatrix,NewQ)}).
+    Minor=minor(linalg:matmul(Matrix,HMatrix)),
+    householder(Minor,{linalg:matmul(QMatrix,NewQ),linalg:matmul(RMatrix,NewQ)}).
 
 -spec hmatrix(matrix()) -> matrix().
 hmatrix([[H|Col]|_])->
-    Alpha = norm([H|Col]),
+    Alpha = linalg:norm([H|Col]),
     U =[(H-Alpha)|Col],
-    V =divide([U],norm(U)),
-    sub(eye(length(U)),mul(2,matmul(transpose(V),V))).
+    V =linalg:divide([U],linalg:norm(U)),
+    linalg:sub(linalg:eye(length(U)),linalg:mul(2,linalg:matmul(linalg:transpose(V),V))).
 
 -spec minor(matrix()) -> matrix().
 minor([_|Matrix])->
@@ -59,5 +52,5 @@ pad(ColWise,N)->
 
 -spec qr(matrix()) -> {matrix(),matrix()}.
 qr(RowWise)->
-   householder(transpose(RowWise)).
+   householder(linalg:transpose(RowWise)).
 
