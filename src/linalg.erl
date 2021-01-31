@@ -13,6 +13,7 @@
 -export([fill/2,fill/3]).
 -export([identity/1,diag/1,eye/1,eye/2]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
+-export([mean/1,median/1,std/1,var/1,cov/2]).
 -export([epsilon/1,exp/1,log/1,sqrt/1]).
 -export([sum/1,sumsq/1,prod/1,norm/1]).
 -export([roots/1,qr/1,cholesky/1]).
@@ -123,6 +124,29 @@ diag([[X|_]|_]=M) when is_number(X)->
 identity(N) ->
 	diag(ones(N)).
 
+% Reference
+-spec row(dim(),matrix())->vector()|matrix().
+row(0,_)->
+    [];
+row(I,Matrix) when I>0 ->
+    nth(I,Matrix);
+row(I,Matrix) when I<0 ->
+    {A,[_|B]}=split(-(I+1),Matrix),
+    append(A,B).
+
+-spec col(dim(),matrix())->vector()|matrix().
+col(0,_)->
+    [];
+col(J,Matrix) when J>0 ->
+    [nth(J,Row)||Row<-Matrix];
+col(J,Matrix) when J<0 ->
+    Colbind=fun({A,[_|B]})->append(A,B) end,
+    [ Colbind(split(-(J+1),Row)) ||Row<-Matrix].
+
+-spec cell(dim(),dim(),matrix())->scalar().
+cell(I,J,Matrix) ->
+    nth(J,nth(1,row(I,Matrix))).
+
 % Transformation
 -spec transpose(matrix())->matrix().
 transpose([[]]) -> 
@@ -227,7 +251,6 @@ max([H|Vector]) when is_number(H)->
 max([H|Tail])->
     max(lists:flatten([H|Tail])).
 
-
 norm(X) when is_number(X)->
     X;
 norm([H|_]=Vector) when is_number(H)->
@@ -235,43 +258,72 @@ norm([H|_]=Vector) when is_number(H)->
 norm([[H|_]|_]=Matrix) when is_number(H)->
     norm(lists:flatten(Matrix)).
 
-% Reference
--spec row(dim(),matrix())->vector()|matrix().
-row(0,_)->
-    [];
-row(I,Matrix) when I>0 ->
-    nth(I,Matrix);
-row(I,Matrix) when I<0 ->
-    {A,[_|B]}=split(-(I+1),Matrix),
-    append(A,B).
+% Stats
 
--spec col(dim(),matrix())->vector()|matrix().
-col(0,_)->
-    [];
-col(J,Matrix) when J>0 ->
-    [nth(J,Row)||Row<-Matrix];
-col(J,Matrix) when J<0 ->
-    Colbind=fun({A,[_|B]})->append(A,B) end,
-    [ Colbind(split(-(J+1),Row)) ||Row<-Matrix].
+mean(X) when is_number(X)->X;
+mean([X]) when is_number(X)->X;
+mean([X|Xs]) when is_number(X) ->
+    sum([X|Xs])/length([X|Xs]);
+mean([[H|_]|_]=Matrix) when is_number(H)->
+    mean(lists:flatten(Matrix)).
 
--spec cell(dim(),dim(),matrix())->scalar().
-cell(I,J,Matrix) ->
-    nth(J,nth(1,row(I,Matrix))).
+median(X) when is_number(X)->X;
+median([X]) when is_number(X)->X;
+median([X|Xs]) when is_number(X)->
+     median_(lists:sort([X|Xs]));
+median([[H|_]|_]=Matrix) when is_number(H)->
+    median(lists:flatten(Matrix)).
+
+median_([X])->X;
+median_([X1,X2])->(X1+X2)/2;
+median_([_|Tail])->
+     median_(lists:droplast(Tail)).
+
+std(X)->
+   math:sqrt(var(X)).
+
+var(X) when is_number(X)->0;
+var([X]) when is_number(X)->0;
+var([X|Xs]) when is_number(X)->
+    {_Mean,SumSq,N} = welford(Xs,{X,0,1}),
+    SumSq/N;
+var([[H|_]|_]=Matrix) when is_number(H)->
+    var(lists:flatten(Matrix)).
+
+% Welford
+welford([],{Mean,SumSq,N})->
+    {Mean,SumSq,N};
+welford([H|Tail],{Mean,SumSq,N})->
+    D1=H-Mean,
+    NewMean=Mean+D1/(N+1),
+    D2=H-NewMean,
+    NewSumSq=SumSq+D1*D2,
+    welford(Tail,{NewMean,NewSumSq,N+1}).
+
+cov([X],[Y]) when is_number(X) andalso is_number(Y) ->
+    0;
+cov([X|Xs],[Y|Ys]) when is_number(X) andalso is_number(Y) ->
+    cov(Xs,Ys,{X,Y,0,0,0,1}).
+
+cov([],[],{_X0,_Y0,DX,DY,DXY,N})->
+    (DXY-DX*DY/N)/(N-1);
+cov([X|XTail],[Y|YTail],{X0,Y0,DX,DY,DXY,N})->
+    cov(XTail,YTail,{X0,Y0,DX+(X-X0),DY+(Y-Y0),DXY+(X-X0)*(Y-Y0),N+1}).
 
 % Solves
 -spec det(matrix())->scalar().
 det([[X]])->
     X;
 
-% well known 2x2
+% well known 2x2 ...
 det([[A,B],[C,D]])->
     A*D-B*C;
 
-% rule of sarrus 3x3 and extention 4x4 
-% (speeds up processing by 2x 3x for larger matrix)
+% ... rule of sarrus 3x3 ...
 det([[A,B,C],[D,E,F],[G,H,I]])->
     A*E*I + B*F*G + C*D*H - C*E*G - B*D*I - A*F*H;
 
+% ... and extention 4x4 (speeds up processing for larger matrix by 2-3x)
 det([[A,B,C,D],[E,F,G,H],[I,J,K,L],[M,N,O,P]])->
       A*F*K*P - A*F*L*O - A*G*J*P + A*G*L*N + A*H*J*O - A*H*K*N - B*E*K*P + B*E*L*O 
     + B*G*I*P - B*G*L*M - B*H*I*O + B*H*K*M + C*E*J*P - C*E*L*N - C*F*I*P + C*F*L*M 
