@@ -14,10 +14,10 @@
 -export([identity/1,diag/1,eye/1,eye/2]).
 -export([add/2,sub/2,mul/2,divide/2,pow/2]).
 -export([mean/1,median/1,std/1,var/1,cov/2]).
--export([epsilon/1,exp/1,log/1,sqrt/1]).
+-export([epsilon/1,exp/1,abs/1,log/1,sqrt/1]).
 -export([sum/1,sumsq/1,prod/1,norm/1]).
 -export([roots/1,qr/1,cholesky/1]).
--export([min/1,max/1]).
+-export([min/1,max/1,argmin/1,argmax/1]).
 
 -define(EPSILON,1.0e-12).
 -define(NA,na).
@@ -202,6 +202,9 @@ outer(Row, [Col|Rest], R) ->
 exp(M)->
     sig1(M,fun(X)->math:exp(X) end,[]).
 
+abs(M)->
+    sig1(M,fun(X)->erlang:abs(X) end,[]).
+
 log(M)->
     sig1(M,fun(X)->math:log(X) end,[]).
 
@@ -209,7 +212,7 @@ sqrt(M)->
     sig1(M,fun(X)->math:sqrt(X) end,[]).
 
 epsilon(M)->
-    sig1(M,fun(X)-> case (abs(X)<?EPSILON) of true->0; false->X end end,[]).
+    sig1(M,fun(X)-> case (erlang:abs(X)<?EPSILON) of true->0; false->X end end,[]).
 
 add(M1,M2)->
     sig2(M1,M2,fun(A,B)->A+B end,[]).
@@ -251,12 +254,33 @@ max([H|Vector]) when is_number(H)->
 max([H|Tail])->
     max(lists:flatten([H|Tail])).
 
-norm(X) when is_number(X)->
-    X;
-norm([H|_]=Vector) when is_number(H)->
-    math:sqrt(sum(pow(Vector,2)));
-norm([[H|_]|_]=Matrix) when is_number(H)->
-    norm(lists:flatten(Matrix)).
+argmin(X) when is_number(X)->0;
+argmin([H|Vector]) when is_number(H)->
+    IdxVector=lists:zip(lists:seq(1,length(Vector)),Vector),
+    element(1,lists:foldl(fun({I,X},{K,Min})->argmin({I,X},{K,Min}) end,{0,H},IdxVector));
+argmin([H|Tail])->
+    argmin(lists:flatten([H|Tail])).
+
+argmin({I,X},{_,Min}) when X<Min->
+    {I,X};
+argmin({_,_},{K,Min}) ->
+    {K,Min}.
+
+argmax(X) when is_number(X)->0;
+argmax([H|Vector]) when is_number(H)->
+    IdxVector=lists:zip(lists:seq(1,length(Vector)),Vector),
+    element(1,lists:foldl(fun({I,X},{K,Max})->argmax({I,X},{K,Max}) end,{0,H},IdxVector));
+argmax([H|Tail])->
+    argmax(lists:flatten([H|Tail])).
+
+argmax({I,X},{_,Max}) when X>Max->
+    {I,X};
+argmax({_,_},{K,Max}) ->
+    {K,Max}.
+
+
+norm(X)->
+   math:sqrt(sumsq(X)).
 
 % Stats
 
