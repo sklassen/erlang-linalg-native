@@ -256,8 +256,8 @@ max([H|Tail])->
 
 argmin(X) when is_number(X)->0;
 argmin([H|Vector]) when is_number(H)->
-    IdxVector=lists:zip(lists:seq(1,length(Vector)),Vector),
-    element(1,lists:foldl(fun({I,X},{K,Min})->argmin({I,X},{K,Min}) end,{0,H},IdxVector));
+    IdxVector=lists:zip(lists:seq(2,length(Vector)+1),Vector),
+    element(1,lists:foldl(fun({I,X},{K,Min})->argmin({I,X},{K,Min}) end,{1,H},IdxVector));
 argmin([H|Tail])->
     argmin(lists:flatten([H|Tail])).
 
@@ -268,8 +268,8 @@ argmin({_,_},{K,Min}) ->
 
 argmax(X) when is_number(X)->0;
 argmax([H|Vector]) when is_number(H)->
-    IdxVector=lists:zip(lists:seq(1,length(Vector)),Vector),
-    element(1,lists:foldl(fun({I,X},{K,Max})->argmax({I,X},{K,Max}) end,{0,H},IdxVector));
+    IdxVector=lists:zip(lists:seq(2,length(Vector)+1),Vector),
+    element(1,lists:foldl(fun({I,X},{K,Max})->argmax({I,X},{K,Max}) end,{1,H},IdxVector));
 argmax([H|Tail])->
     argmax(lists:flatten([H|Tail])).
 
