@@ -30,8 +30,8 @@ var_test() ->
 
 covar_test() ->
     [
-	?assertEqual(0,cov([1.0],[1.0])),
-	?assertEqual(0.5,cov([1.0,2.0],[3.0,4.0])),
-	?assertEqual(1.0,cov([1.0,2.0,3.0],[4.0,5.0,6.0]))
+	?assertEqual([[na,na],[na,na]],cov([1.0],[1.0])),
+	?assertEqual([[0.5,0.5],[0.5,0.5]],cov([1.0,2.0],[3.0,4.0])),
+	?assertEqual([[1.0,1.0],[1.0,1.0]],cov([1.0,2.0,3.0],[4.0,5.0,6.0]))
     ].
 
