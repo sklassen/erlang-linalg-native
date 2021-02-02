@@ -29,16 +29,15 @@ crout(N,Matrix) when N==length(Matrix)->
 crout(N,Matrix)->
      % peel
      {Top,Bottom}=lists:split(N,Matrix),
-     {[SL|Left],Minor}=lists:unzip([lists:split(N,Rs)|| Rs<-Bottom]),
-     [[H|Row]|Rows]=Minor,
-     {Col,SubMinor}=lists:unzip([lists:split(1,Rs)|| Rs<-Rows]),
+     {[SL|Left],[[H|Row]|Rows]}=lists:unzip([lists:split(N,Rs)|| Rs<-Bottom]),
+     {Col,Minor}=lists:unzip([lists:split(1,Rs)|| Rs<-Rows]),
      % calc
      S=linalg:sumsq(SL),
      NewH=sqrt(H-S),
      NewRow=[0||_<-Row],
      NewCol=[[(Y-linalg:dot(SL,lists:sublist(linalg:row(J+1,[SL|Left]),N)))/NewH]||{J,[Y]}<-lists:zip(lists:seq(1,length(Col)),Col)],
      % rebuild peel
-     NewBottom=[A++B++C||{A,B,C}<-lists:zip3([SL|Left],[[NewH]|NewCol],[NewRow|SubMinor])],
+     NewBottom=[A++B++C||{A,B,C}<-lists:zip3([SL|Left],[[NewH]|NewCol],[NewRow|Minor])],
      crout(N+1,lists:append(Top,NewBottom)).
 
 sqrt(X) when X<0 ->
