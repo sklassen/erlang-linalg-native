@@ -21,6 +21,7 @@
 
 -define(EPSILON,1.0e-12).
 -define(NA,na).
+-define(ERR,err).
 
 -type dim() :: non_neg_integer().
 -type scalar() :: number().
@@ -373,12 +374,12 @@ inv([[X]])->
     [[1.0/X]];
 inv([[A,B],[C,D]])->
     case det([[A,B],[C,D]]) of
-       0.0->err;
+       0.0->?ERR;
        Det->[[D/Det,-1/Det*B],[-1/Det*C,A/Det]]
     end;
 inv(M)->
     case det(M) of
-       0.0->err;
+       0.0->?ERR;
        Det->divide(transpose(mul(minors(M),cofactors(M))),Det)
     end.
 
