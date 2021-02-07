@@ -9,6 +9,10 @@ names, signature and results. This is the native version is slower than
 those NIFs. This code was written to be readable and (maybe) teachable rather
 than fast.
 
+Erlang's lists:nth indexes start at 1; and linalg's Row, Col, Cell, ArgMax and ArgMin 
+function use this convention. This differs from python et al at start at 0.
+Like the numpy and scipy, matrix input is alway expected to be Row Major. 
+
 Suggestions, enhancements and pull-requests welcomed. 
 
 # Installation
@@ -65,11 +69,22 @@ Basic Scalar, Vector and Matrix Arithmetric
  - divide(n,m)
  - pow(n,m)
  - sqrt(m)
+ - abs(m)
  - log(m)
 
-Matrix Reduction
+Reductions
  - sum(m)
+ - sumsq(m)
  - norm(m)
+ - mean(m)
+ - median(m)
+ - std(m)
+ - var(m)
+ - cov(m)
+ - min(m)
+ - max(m)
+ - argmin(m)
+ - argmax(m)
 
 # Usage
 
