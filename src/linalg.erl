@@ -4,7 +4,7 @@
 
 -import(lists,[reverse/1,append/2,nth/2,seq/2,split/2,zip/2,foldl/3]).
 
--export([row/2,col/2,cell/3]). 
+-export([row/2,col/2,cell/3,set_cell/4]). 
 -export([transpose/1,flipud/1,fliplr/1]). 
 -export([det/1,inv/1,shape/1]). 
 -export([dot/2,inner/2,outer/2,matmul/2,solve/2]). 
@@ -146,7 +146,12 @@ col(J,Matrix) when J<0 ->
 
 -spec cell(dim(),dim(),matrix())->scalar().
 cell(I,J,Matrix) ->
-    nth(J,nth(1,row(I,Matrix))).
+    nth(J, row(I, Matrix)).
+
+-spec set_cell(dim(),dim(),scalar(),matrix())->matrix().
+set_cell(I,J,Value,Matrix) ->
+    Row = row(I, Matrix),
+    set_nth(I, Matrix, set_nth(J, Row, Value)).
 
 % Transformation
 -spec transpose(matrix())->matrix().
@@ -443,3 +448,6 @@ reduction([X|_]=Vector,Fun,Init) when is_number(X)->
     foldl(Fun,Init,Vector);
 reduction([V|_]=Matrix,Fun,Init) when is_list(V) ->
     reduction(lists:flatten(Matrix),Fun,Init).
+
+set_nth(1, [_|T], Value) -> [Value|T];
+set_nth(I, [H|T], Value) -> [H|set_nth(I-1, T, Value)].

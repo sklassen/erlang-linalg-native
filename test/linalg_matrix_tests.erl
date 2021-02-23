@@ -1,7 +1,24 @@
 -module(linalg_matrix_tests).
+-import(linalg,[cell/3,set_cell/4]).
 -import(linalg,[zeros/1,zeros/2,ones/1,ones/2,fill/2,fill/3]).
 -import(linalg,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
+
+cell_test() ->
+    Matrix = [[1, 2, 3], [4, 5, 6]],
+    [
+    ?assertEqual(cell(1,1,Matrix), 1),
+    ?assertEqual(cell(2,3,Matrix), 6),
+    ?assertException(error, function_clause,cell(10,2,Matrix))
+    ].
+
+set_cell_test() ->
+    Matrix = [[1, 2, 3], [4, 5, 6]],
+    [
+    ?assertEqual(set_cell(1,1,2,Matrix), [[2, 2, 3], [4, 5, 6]]),
+    ?assertEqual(set_cell(2,2,4,Matrix), [[1, 2, 3], [4, 4, 6]]),
+    ?assertException(error, function_clause, set_cell(10,2,3,Matrix))
+    ].
 
 dot_3_test() ->
 	?assertEqual(32.0,dot([1.0,2.0,3.0],[4.0,5.0,6.0])).
