@@ -24,23 +24,23 @@ crout(N,Matrix) when N==length(Matrix)->
      Matrix;
 crout(N,Matrix)->
      {Top,Bottom}=lists:split(N,Matrix),
-     {Left,Minor}=lists:unzip([lists:split(N,Rs)|| Rs<-Bottom]),
+     {[SL|Left],Minor}=lists:unzip([lists:split(N,Rs)|| Rs<-Bottom]),
      [[H|Row]|Rows]=Minor,
      {Col,SubMinor}=lists:unzip([lists:split(1,Rs)|| Rs<-Rows]),
      % print
-     io:format("~nM=~p (~p)~n",[Matrix,N]),
+     io:format("~nGO M=~p (~p)~n",[Matrix,N]),
      io:format("H=~p~n",[H]),
      io:format("Col=~p~n",[Col]),
      io:format("Row=~p~n",[Row]),
      io:format("Left=~p~n",[Left]),
-     SL=lists:sublist(linalg:row(N+1,Matrix),N),
+     io:format("SL=~p~n",[SL]),
      S=linalg:sumsq(SL),
      NewH=sqrt(H-S),
      NewRow=[0||_<-Row],
-     NewCol=[[(Y-dot(SL,lists:sublist(linalg:row(J+1,Left),N)))/NewH]||{J,[Y]}<-lists:zip(lists:seq(1,length(Col)),Col)],
+     NewCol=[[(Y-dot(SL,lists:sublist(linalg:row(J+1,[SL|Left]),N)))/NewH]||{J,[Y]}<-lists:zip(lists:seq(1,length(Col)),Col)],
      io:format("new col ~p ~n",[NewCol]),
      % rebuild
-     NewBottom=[A++B++C||{A,B,C}<-lists:zip3(Left,[[NewH]|NewCol],[NewRow|SubMinor])],
+     NewBottom=[A++B++C||{A,B,C}<-lists:zip3([SL|Left],[[NewH]|NewCol],[NewRow|SubMinor])],
      crout(N+1,lists:append(Top,NewBottom)).
 
 dot(A,B)->
