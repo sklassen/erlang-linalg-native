@@ -21,28 +21,32 @@
 %
 
 -spec crout(matrix()) -> matrix().
-crout(RowWise)->
-   crout(0,RowWise).
+crout(RowWise) ->
+    crout(0, RowWise).
 
-crout(N,Matrix) when N==length(Matrix)->
-     Matrix;
-crout(N,Matrix)->
-     % peel
-     {Top,Bottom}=lists:split(N,Matrix),
-     {[SL|Left],[[H|Row]|Rows]}=lists:unzip([lists:split(N,Rs)|| Rs<-Bottom]),
-     {Col,Minor}=lists:unzip([lists:split(1,Rs)|| Rs<-Rows]),
-     % calc
-     S=linalg:sumsq(SL),
-     NewH=sqrt(H-S),
-     NewRow=[0||_<-Row],
-     NewCol=[[(Y-linalg:dot(SL,lists:sublist(linalg:row(J+1,[SL|Left]),N)))/NewH]||{J,[Y]}<-lists:zip(lists:seq(1,length(Col)),Col)],
-     % rebuild peel
-     NewBottom=[A++B++C||{A,B,C}<-lists:zip3([SL|Left],[[NewH]|NewCol],[NewRow|Minor])],
-     crout(N+1,lists:append(Top,NewBottom)).
+crout(N, Matrix) when N == length(Matrix) ->
+    Matrix;
+crout(N, Matrix) ->
+    % peel
+    {Top, Bottom} = lists:split(N, Matrix),
+    {[SL | Left], [[H | Row] | Rows]} = lists:unzip([lists:split(N, Rs) || Rs <- Bottom]),
+    {Col, Minor} = lists:unzip([lists:split(1, Rs) || Rs <- Rows]),
+    % calc
+    S = linalg:sumsq(SL),
+    NewH = sqrt(H - S),
+    NewRow = [0 || _ <- Row],
+    NewCol = [
+        [(Y - linalg:dot(SL, lists:sublist(linalg:row(J + 1, [SL | Left]), N))) / NewH]
+     || {J, [Y]} <- lists:zip(lists:seq(1, length(Col)), Col)
+    ],
+    % rebuild peel
+    NewBottom = [
+        A ++ B ++ C
+     || {A, B, C} <- lists:zip3([SL | Left], [[NewH] | NewCol], [NewRow | Minor])
+    ],
+    crout(N + 1, lists:append(Top, NewBottom)).
 
-sqrt(X) when X<0 ->
-   erlang:error({error,matrix_not_positive_defined});
+sqrt(X) when X < 0 ->
+    erlang:error({error, matrix_not_positive_defined});
 sqrt(X) ->
-   math:sqrt(X).
-
-
+    math:sqrt(X).

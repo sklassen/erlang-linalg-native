@@ -2,6 +2,5 @@
 -author('simon.klassen').
 -export([start/2]).
 
-start(_,_) ->
-	ok.
-
+start(_, _) ->
+    ok.

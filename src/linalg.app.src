@@ -1,12 +1,11 @@
-{application, linalg,
- [
-  {description, ""},
-  {vsn, "1"},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {mod, { linalg, []}},
-  {env, []}
- ]}.
+{application, linalg, [
+    {description, ""},
+    {vsn, "1"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {mod, {linalg, []}},
+    {env, []}
+]}.
