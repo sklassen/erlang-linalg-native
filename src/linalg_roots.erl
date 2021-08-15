@@ -2,7 +2,6 @@
 -vsn('1.0').
 -author('simon.klassen').
 -import(math,[pi/0,acos/1,cos/1,sqrt/1,pow/2]).
--import(list,[sort/1]).
 -export([roots/1]).
 -define(SMALL,1.0e-10).
 
@@ -51,7 +50,7 @@ roots([1,A,B,C]) ->
         X1=-2*SqrtQ*cos(TH/3) - A/3,
         X2=-2*SqrtQ*cos((TH + 2*pi())/3) - A/3,
         X3=-2*SqrtQ*cos((TH - 2*pi())/3) - A/3,
-        sort([X1,X2,X3]);
+        lists:sort([X1,X2,X3]);
       false-> 
         % one real root
         Alpha = -sign(1,R)*pow(abs(R)+sqrt(R2-Q3),1/3),
