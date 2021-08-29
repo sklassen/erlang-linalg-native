@@ -50,7 +50,7 @@ Matrix and Vector
  - matmul(m,n)
 
 Decomposition
- - qr(m) (for square matrix)
+ - qr(m) 
  - cholesky(m)
  - lu(m)
  - roots(v) (upto third order)

@@ -3,6 +3,8 @@
 -author('simon.klassen').
 -export([qr/1]).
 
+-define(EPSILON,1.0e-12).
+
 -type scalar() :: number().
 -type vector() :: list(scalar()).
 -type matrix() :: list(vector()).
@@ -50,4 +52,15 @@ pad(ColWise, N) ->
 
 -spec qr(matrix()) -> {matrix(), matrix()}.
 qr(RowWise) ->
-    householder(linalg:transpose(RowWise)).
+		qr(RowWise,linalg:shape(RowWise)).
+
+qr(RowWise,{M,N}) when M>N ->
+		{Qs,Rs}=qr([lists:append(Row,linalg:zeros(M-N))||Row<-RowWise],{M,M}),
+		{[element(1,lists:split(N,Q))||Q<-Qs],[element(1,lists:split(N,R))||R<-element(1,lists:split(N,Rs))]};
+
+qr(RowWise,{M,N}) when M<N ->
+		{Qs,Rs}=qr(lists:append(RowWise,[linalg:add(?EPSILON,linalg:zeros(N))||_<-lists:seq(1,N-M)]),{N,N}),
+		{[element(1,lists:split(M,Q))||Q<-element(1,lists:split(M,Qs))],element(1,lists:split(M,Rs))};
+
+qr(RowWise,{M,N}) when M==N ->
+		householder(linalg:transpose(RowWise)).
