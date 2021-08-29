@@ -2,8 +2,6 @@
 -vsn('1.0.1').
 -author('simon.klassen').
 
--import(lists, [reverse/1, append/2, nth/2, seq/2, split/2, zip/2, foldl/3]).
-
 -export([row/2, col/2, cell/3, set_cell/4]).
 -export([transpose/1, flipud/1, fliplr/1]).
 -export([det/1, inv/1, shape/1]).
@@ -35,7 +33,7 @@ shape([X | _] = Vector) when is_number(X) ->
     {length(Vector)};
 shape([[X | _] | _] = Matrix) when is_number(X) ->
     NRows = length(Matrix),
-    NCols = length(nth(1, Matrix)),
+    NCols = length(lists:nth(1, Matrix)),
     {NRows, NCols}.
 
 % generation (vector)
@@ -43,31 +41,31 @@ shape([[X | _] | _] = Matrix) when is_number(X) ->
 zeros(0) ->
     [];
 zeros(N) ->
-    [0 || _ <- seq(1, N)].
+    [0 || _ <- lists:seq(1, N)].
 
 -spec ones(dim()) -> vector().
 ones(0) ->
     [];
 ones(N) ->
-    [1 || _ <- seq(1, N)].
+    [1 || _ <- lists:seq(1, N)].
 
 -spec sequential(dim()) -> vector().
 sequential(0) ->
     [];
 sequential(N) ->
-    [X || X <- seq(1, N)].
+    [X || X <- lists:seq(1, N)].
 
 -spec random(dim()) -> vector().
 random(0) ->
     [];
 random(N) ->
-    [rand:uniform() || _ <- seq(1, N)].
+    [rand:uniform() || _ <- lists:seq(1, N)].
 
 -spec fill(dim(), scalar()) -> vector().
 fill(0, _) ->
     [];
 fill(N, Value) ->
-    [Value || _ <- seq(1, N)].
+    [Value || _ <- lists:seq(1, N)].
 
 % generation (matrix)
 -spec zeros(dim(), dim()) -> matrix().
@@ -76,7 +74,7 @@ zeros(0, _) ->
 zeros(_, 0) ->
     [[]];
 zeros(NR, NC) ->
-    [[0 || _ <- seq(1, NC)] || _ <- seq(1, NR)].
+    [[0 || _ <- lists:seq(1, NC)] || _ <- lists:seq(1, NR)].
 
 -spec ones(dim(), dim()) -> matrix().
 ones(0, _) ->
@@ -84,15 +82,15 @@ ones(0, _) ->
 ones(_, 0) ->
     [[]];
 ones(NR, NC) ->
-    [[1 || _ <- seq(1, NC)] || _ <- seq(1, NR)].
+    [[1 || _ <- lists:seq(1, NC)] || _ <- lists:seq(1, NR)].
 
 -spec sequential(dim(), dim()) -> matrix().
 sequential(NR, NC) ->
-    [[(((R - 1) * NC) + C) / 1.0 || C <- seq(1, NC)] || R <- seq(1, NR)].
+    [[(((R - 1) * NC) + C) / 1.0 || C <- lists:seq(1, NC)] || R <- lists:seq(1, NR)].
 
 -spec random(dim(), dim()) -> matrix().
 random(NR, NC) ->
-    [[rand:uniform() || _ <- seq(1, NC)] || _ <- seq(1, NR)].
+    [[rand:uniform() || _ <- lists:seq(1, NC)] || _ <- lists:seq(1, NR)].
 
 -spec fill(dim(), dim(), scalar()) -> matrix().
 fill(0, _, _) ->
@@ -100,11 +98,9 @@ fill(0, _, _) ->
 fill(_, 0, _) ->
     [[]];
 fill(NR, NC, Value) ->
-    [fill(NC, Value) || _ <- seq(1, NR)].
+    [fill(NC, Value) || _ <- lists:seq(1, NR)].
 
 -spec eye(dim()) -> matrix().
-eye(0) ->
-    eye([[]]);
 eye(N) ->
     eye(N, N).
 
@@ -116,9 +112,9 @@ eye(N, M) ->
                 {C, R} -> 1;
                 {R, C} -> 0
             end
-         || R <- seq(1, M)
+         || R <- lists:seq(1, M)
         ]
-     || C <- seq(1, N)
+     || C <- lists:seq(1, N)
     ].
 
 -spec diag(vector() | matrix()) -> matrix() | vector().
@@ -127,16 +123,16 @@ diag([X | _] = V) when is_number(X) ->
     [
         [
             case R of
-                C -> nth(R, V);
+                C -> lists:nth(R, V);
                 _ -> 0
             end
-         || R <- seq(1, length(V))
+         || R <- lists:seq(1, length(V))
         ]
-     || C <- seq(1, length(V))
+     || C <- lists:seq(1, length(V))
     ];
 % (M)atrix M->V
 diag([[X | _] | _] = M) when is_number(X) ->
-    [nth(R, nth(R, M)) || R <- seq(1, length(M))].
+    [lists:nth(R, lists:nth(R, M)) || R <- lists:seq(1, length(M))].
 
 -spec identity(dim()) -> matrix().
 identity(N) ->
@@ -147,23 +143,23 @@ identity(N) ->
 row(0, _) ->
     [];
 row(I, Matrix) when I > 0 ->
-    nth(I, Matrix);
+    lists:nth(I, Matrix);
 row(I, Matrix) when I < 0 ->
-    {A, [_ | B]} = split(-(I + 1), Matrix),
-    append(A, B).
+    {A, [_ | B]} = lists:split(-(I + 1), Matrix),
+    lists:append(A, B).
 
 -spec col(dim(), matrix()) -> vector() | matrix().
 col(0, _) ->
     [];
 col(J, Matrix) when J > 0 ->
-    [nth(J, Row) || Row <- Matrix];
+    [lists:nth(J, Row) || Row <- Matrix];
 col(J, Matrix) when J < 0 ->
-    Colbind = fun({A, [_ | B]}) -> append(A, B) end,
-    [Colbind(split(-(J + 1), Row)) || Row <- Matrix].
+    Colbind = fun({A, [_ | B]}) -> lists:append(A, B) end,
+    [Colbind(lists:split(-(J + 1), Row)) || Row <- Matrix].
 
 -spec cell(dim(), dim(), matrix()) -> scalar().
 cell(I, J, Matrix) ->
-    nth(J, row(I, Matrix)).
+    lists:nth(J, row(I, Matrix)).
 
 -spec set_cell(dim(), dim(), scalar(), matrix()) -> matrix().
 set_cell(I, J, Value, Matrix) ->
@@ -183,16 +179,16 @@ transpose([[X | Xs] | Rows]) ->
 
 -spec flipud(matrix()) -> matrix().
 flipud(M) ->
-    reverse(M).
+    lists:reverse(M).
 
 -spec fliplr(matrix()) -> matrix().
 fliplr(M) ->
-    [reverse(R) || R <- M].
+    [lists:reverse(R) || R <- M].
 
 % Sum Product (slower than inner, for big vectors, but succient)
 -spec dot(vector(), vector()) -> scalar().
 dot(VecA, VecB) ->
-    foldl(fun(X, Sum) -> Sum + X end, 0, lists:zipwith(fun(X, Y) -> X * Y end, VecA, VecB)).
+    lists:foldl(fun(X, Sum) -> Sum + X end, 0, lists:zipwith(fun(X, Y) -> X * Y end, VecA, VecB)).
 
 % Matrix Multiplication
 -spec matmul(matrix(), matrix()) -> matrix().
@@ -213,7 +209,7 @@ inner([A | VecA], [B | VecB], Sum) ->
 inner(VecA, VecB) ->
     inner(VecA, VecB, 0).
 
--spec outer(vector(), vector()) -> matrix().
+-spec outer(vector(), matrix()) -> vector().
 outer(V1, V2) ->
     outer(V1, V2, []).
 outer(_, [], R) ->
@@ -405,7 +401,7 @@ det([[A, B, C, D], [E, F, G, H], [I, J, K, L], [M, N, O, P]]) ->
         D * F * K * M - D * G * I * N + D * G * J * M;
 % laplace
 det([H | Tail]) ->
-    sum([pow(-1, J - 1) * X * det(col(-J, Tail)) || {J, X} <- zip(seq(1, length(H)), H)]).
+    sum([pow(-1, J - 1) * X * det(col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]).
 
 -spec solve(matrix(), matrix()) -> matrix().
 solve(X, B) ->
@@ -426,15 +422,16 @@ inv(M) ->
         Det -> divide(transpose(mul(minors(M), cofactors(M))), Det)
     end.
 
+-spec minors(matrix()) -> matrix().
 minors(Matrix) ->
     {NRows, NCols} = shape(Matrix),
-    [[det(col(-J, row(-I, Matrix))) || J <- seq(1, NCols)] || I <- seq(1, NRows)].
+    [[det(col(-J, row(-I, Matrix))) || J <- lists:seq(1, NCols)] || I <- lists:seq(1, NRows)].
 
+-spec cofactors(matrix()) -> matrix().
 cofactors(Matrix) ->
     {NRows, NCols} = shape(Matrix),
-    [[pow(-1, I) * pow(-1, J) || J <- seq(0, NCols - 1)] || I <- seq(0, NRows - 1)].
+    [[pow(-1, I) * pow(-1, J) || J <- lists:seq(0, NCols - 1)] || I <- lists:seq(0, NRows - 1)].
 
--spec roots(vector()) -> vector().
 roots(Vector) ->
     linalg_roots:roots(Vector).
 
@@ -451,18 +448,18 @@ qr(RowWise) ->
 sig1(X, Fun, _) when is_number(X) ->
     Fun(X);
 sig1([], _Fun, Acc) ->
-    reverse(Acc);
+    lists:reverse(Acc);
 sig1([H | _] = Vector, Fun, []) when is_number(H) ->
     [Fun(X) || X <- Vector];
 sig1([R1 | Matrix], Fun, Acc) ->
     sig1(Matrix, Fun, [[Fun(X) || X <- R1] | Acc]).
 
 sig2([], [], _Fun, Acc) ->
-    reverse(Acc);
+    lists:reverse(Acc);
 sig2(X, [], _Fun, Acc) when is_number(X) ->
-    reverse(Acc);
+    lists:reverse(Acc);
 sig2([], X, _Fun, Acc) when is_number(X) ->
-    reverse(Acc);
+    lists:reverse(Acc);
 sig2(A, B, Fun, []) when is_number(A) andalso is_number(B) ->
     Fun(A, B);
 sig2(A, [B | Vector], Fun, []) when is_number(A) andalso is_number(B) ->
@@ -470,18 +467,18 @@ sig2(A, [B | Vector], Fun, []) when is_number(A) andalso is_number(B) ->
 sig2([A | Vector], B, Fun, []) when is_number(A) andalso is_number(B) ->
     [Fun(X, B) || X <- [A | Vector]];
 sig2([A | VectorA], [B | VectorB], Fun, []) when is_number(A) andalso is_number(B) ->
-    [Fun(X, Y) || {X, Y} <- zip([A | VectorA], [B | VectorB])];
+    [Fun(X, Y) || {X, Y} <- lists:zip([A | VectorA], [B | VectorB])];
 sig2(A, [R2 | M2], Fun, Acc) when is_number(A) ->
     sig2(A, M2, Fun, [[Fun(A, B) || B <- R2] | Acc]);
 sig2([R1 | M1], B, Fun, Acc) when is_number(B) ->
     sig2(M1, B, Fun, [[Fun(A, B) || A <- R1] | Acc]);
 sig2([R1 | M1], [R2 | M2], Fun, Acc) ->
-    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- zip(R1, R2)] | Acc]).
+    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- lists:zip(R1, R2)] | Acc]).
 
 reduction([], _Fun, Init) ->
     Init;
 reduction([X | _] = Vector, Fun, Init) when is_number(X) ->
-    foldl(Fun, Init, Vector);
+    lists:foldl(Fun, Init, Vector);
 reduction([V | _] = Matrix, Fun, Init) when is_list(V) ->
     reduction(lists:flatten(Matrix), Fun, Init).
 
