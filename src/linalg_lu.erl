@@ -1,7 +1,7 @@
 -module(linalg_lu).
 -vsn('1.0.1').
 -author('simon.klassen').
--export([swap/3, lu/1]).
+-export([lu/1]).
 
 -type scalar() :: number().
 -type vector() :: list(scalar()).
