@@ -19,8 +19,8 @@ det([[A, B, C, D], [E, F, G, H], [I, J, K, L], [M, N, O, P]]) ->
     C * H * I * N - C * H * J * M - D * E * J * O + D * E * K * N + D * F * I * O -
     D * F * K * M - D * G * I * N + D * G * J * M;
 % Laplace 5x5 
-det([H | Tail]) when length(H)==5 andalso length([H|Tail])==5 ->
-		linalg:sum([math:pow(-1, J - 1) * X * det(linalg:col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]);
+%det([H | Tail]) when length(H)==5 andalso length([H|Tail])==5 ->
+%		linalg:sum([math:pow(-1, J - 1) * X * det(linalg:col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]);
 % Remaining square matrix
 det([H | Tail]=RowWise) when length(H)==length([H|Tail]) ->
 	det(RowWise,1);

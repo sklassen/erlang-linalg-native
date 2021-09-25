@@ -1,7 +1,7 @@
 -module(linalg_matrix_tests).
 -import(linalg,[cell/3,set_cell/4]).
 -import(linalg,[zeros/1,zeros/2,ones/1,ones/2,fill/2,fill/3]).
--import(linalg,[det/1,inv/1,transpose/1,dot/2,matmul/2]).
+-import(linalg,[inv/1,transpose/1,dot/2,matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 cell_test() ->
@@ -38,14 +38,6 @@ matmul_test()->
     ?assertEqual([[14], [32], [50]],matmul([[1,2,3],[4,5,6],[7,8,9]], [[1], [2], [3]])),
     ?_assertException(error, function_clause, matmul([[2.0], [3]], [[3.0]]))
     ].
-
-det_test()->
-    [
-	?assertEqual(6,det([[6]])),
-	?assertEqual(-2,det([[1,2],[3,4]])),
-	?assertEqual(-306,det([[6,1,1], [4,-2,5], [2,8,7]]))
-    ].
-
 
 inv_test()->
     [

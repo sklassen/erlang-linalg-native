@@ -14,7 +14,7 @@
 -export([mean/1, median/1, std/1, var/1, cov/2]).
 -export([epsilon/1, exp/1, abs/1, log/1, sqrt/1]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
--export([roots/1, qr/1, cholesky/1]).
+-export([roots/1, lu/1, qr/1, cholesky/1]).
 -export([min/1, max/1, argmin/1, argmax/1]).
 
 -define(EPSILON, 1.0e-12).
@@ -414,7 +414,7 @@ inv([[X]]) ->
 inv([[A, B], [C, D]]) ->
     case det([[A, B], [C, D]]) of
         0.0 -> ?ERR;
-        Det -> [[D / Det, -1 / Det * B], [-1 / Det * C, A / Det]]
+        Det -> [[D / Det, -B / Det ], [-C / Det, A / Det]]
     end;
 inv(M) ->
     case det(M) of
@@ -438,6 +438,10 @@ roots(Vector) ->
 -spec cholesky(matrix()) -> matrix().
 cholesky(RowWise) ->
     linalg_cholesky:crout(RowWise).
+
+-spec lu(matrix()) -> {matrix(), matrix()}.
+lu(RowWise) ->
+    linalg_lu:lu(RowWise).
 
 -spec qr(matrix()) -> {matrix(), matrix()}.
 qr(RowWise) ->
