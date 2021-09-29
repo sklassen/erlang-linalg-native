@@ -383,25 +383,8 @@ cov([X | XTail], [Y | YTail], {X0, Y0, DX, DXX, DY, DYY, DXY, N}) ->
 
 % Solves
 -spec det(matrix()) -> scalar().
-det([[X]]) ->
-    X;
-% well known 2x2 ...
-det([[A, B], [C, D]]) ->
-    A * D - B * C;
-% ... rule of sarrus 3x3 ...
-det([[A, B, C], [D, E, F], [G, H, I]]) ->
-    A * E * I + B * F * G + C * D * H - C * E * G - B * D * I - A * F * H;
-% ... and extention 4x4 (speeds up processing for larger matrix by 2-3x)
-det([[A, B, C, D], [E, F, G, H], [I, J, K, L], [M, N, O, P]]) ->
-    A * F * K * P - A * F * L * O - A * G * J * P + A * G * L * N + A * H * J * O - A * H * K * N -
-        B * E * K * P + B * E * L * O +
-        B * G * I * P - B * G * L * M - B * H * I * O + B * H * K * M + C * E * J * P -
-        C * E * L * N - C * F * I * P + C * F * L * M +
-        C * H * I * N - C * H * J * M - D * E * J * O + D * E * K * N + D * F * I * O -
-        D * F * K * M - D * G * I * N + D * G * J * M;
-% laplace
-det([H | Tail]) ->
-    sum([pow(-1, J - 1) * X * det(col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]).
+det(X) ->
+    linalg_det:det(X).
 
 -spec solve(matrix(), matrix()) -> matrix().
 solve(X, B) ->

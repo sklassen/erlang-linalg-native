@@ -1,10 +1,12 @@
 -module(linalg_det).
 -export([det/1]).
 
-% 1x1 
+-define(EPSILON, 1.0e-12).
+
+% 1x1 ...
 det([[X]]) ->
     X;
-% well known 2x2 ...
+% .. well known 2x2 ...
 det([[A, B], [C, D]]) ->
     A * D - B * C;
 % ... rule of sarrus 3x3 ...
@@ -18,10 +20,11 @@ det([[A, B, C, D], [E, F, G, H], [I, J, K, L], [M, N, O, P]]) ->
     C * E * L * N - C * F * I * P + C * F * L * M +
     C * H * I * N - C * H * J * M - D * E * J * O + D * E * K * N + D * F * I * O -
     D * F * K * M - D * G * I * N + D * G * J * M;
-% Laplace 5x5 
-%det([H | Tail]) when length(H)==5 andalso length([H|Tail])==5 ->
-%		linalg:sum([math:pow(-1, J - 1) * X * det(linalg:col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]);
-% Remaining square matrix
+% ... Laplace for 5x5 (is as fast as Gauss-Jordon) ...
+det([H | Tail]) when length(H)==5 andalso length([H|Tail])==5 ->
+		linalg:sum([math:pow(-1, J - 1) * X * det(linalg:col(-J, Tail)) || {J, X} <- lists:zip(lists:seq(1, length(H)), H)]);
+
+% ... remaining check for square matrix
 det([H | Tail]=RowWise) when length(H)==length([H|Tail]) ->
 	det(RowWise,1);
 
@@ -35,8 +38,9 @@ det(RowWise,N)->
   {Top,Bottom} = lists:split(N, RowWise),
 	Row = lists:last(Top),
 	case lists:nth(N,Row) of
-	  0 -> case swap(RowWise,N,N+1) of
-					na -> 0;
+	  Z when abs(Z)<?EPSILON -> 
+        case swap(RowWise,N,N+1) of
+					na -> 0.0;
 					New-> -det(New,N)
 				 end;
 		H -> Col=linalg:divide(linalg:col(N,Bottom),H),
@@ -48,7 +52,7 @@ swap(RowWise, _, J) when J > length(RowWise) ->
   na;
 swap(RowWise, I, J) ->
 	case linalg:cell(J,I,RowWise) of
-		0 -> swap(RowWise, I, J+1);
+		Z when abs(Z)<?EPSILON -> swap(RowWise, I, J+1);
 		_ -> {A, [C | Tail]} = lists:split(I - 1, RowWise),
     		 {B, D} = lists:split(J - I, Tail),
     		 lists:append([A, B, [C], D])
