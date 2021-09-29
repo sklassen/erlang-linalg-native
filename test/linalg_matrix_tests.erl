@@ -1,82 +1,91 @@
 -module(linalg_matrix_tests).
--import(linalg,[cell/3,set_cell/4]).
--import(linalg,[zeros/1,zeros/2,ones/1,ones/2,fill/2,fill/3]).
--import(linalg,[inv/1,transpose/1,dot/2,matmul/2]).
+-import(linalg, [cell/3, set_cell/4]).
+-import(linalg, [zeros/1, zeros/2, ones/1, ones/2, fill/2, fill/3]).
+-import(linalg, [inv/1, transpose/1, dot/2, matmul/2]).
 -include_lib("eunit/include/eunit.hrl").
 
 cell_test() ->
     Matrix = [[1, 2, 3], [4, 5, 6]],
     [
-    ?assertEqual(cell(1,1,Matrix), 1),
-    ?assertEqual(cell(2,3,Matrix), 6),
-    ?assertException(error, function_clause,cell(10,2,Matrix))
+        ?assertEqual(cell(1, 1, Matrix), 1),
+        ?assertEqual(cell(2, 3, Matrix), 6),
+        ?assertException(error, function_clause, cell(10, 2, Matrix))
     ].
 
 set_cell_test() ->
     Matrix = [[1, 2, 3], [4, 5, 6]],
     [
-    ?assertEqual(set_cell(1,1,2,Matrix), [[2, 2, 3], [4, 5, 6]]),
-    ?assertEqual(set_cell(2,2,4,Matrix), [[1, 2, 3], [4, 4, 6]]),
-    ?assertException(error, function_clause, set_cell(10,2,3,Matrix))
+        ?assertEqual(set_cell(1, 1, 2, Matrix), [[2, 2, 3], [4, 5, 6]]),
+        ?assertEqual(set_cell(2, 2, 4, Matrix), [[1, 2, 3], [4, 4, 6]]),
+        ?assertException(error, function_clause, set_cell(10, 2, 3, Matrix))
     ].
 
 dot_3_test() ->
-	?assertEqual(32.0,dot([1.0,2.0,3.0],[4.0,5.0,6.0])).
+    ?assertEqual(32.0, dot([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])).
 
 transpose_test() ->
     [
-	?assertEqual([[8.0]],transpose([[8.0]])),
-	?assertEqual([[1.0,3.0],[2.0,4.0]],transpose([[1.0,2.0],[3.0,4.0]])),
-	?assertEqual([[1.0,4.0],[2.0,5.0],[3.0,6.0]],transpose([[1.0,2.0,3.0],[4.0,5.0,6.0]]))
+        ?assertEqual([[8.0]], transpose([[8.0]])),
+        ?assertEqual([[1.0, 3.0], [2.0, 4.0]], transpose([[1.0, 2.0], [3.0, 4.0]])),
+        ?assertEqual(
+            [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]], transpose([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+        )
     ].
 
-matmul_test()->
+matmul_test() ->
     [
-    ?assertEqual([[6.0]],matmul([[2.0]], [[3.0]])),
-    ?assertEqual([[5.0,11.0],[11.0,25.0]],matmul([[1.0,2.0],[3.0,4.0]], [[1.0,3.0],[2.0,4.0]])),
-    ?assertEqual([[30, 36, 42]],matmul([[1,2,3]], [[1,2,3],[4,5,6],[7,8,9]])),
-    ?assertEqual([[14], [32], [50]],matmul([[1,2,3],[4,5,6],[7,8,9]], [[1], [2], [3]])),
-    ?_assertException(error, function_clause, matmul([[2.0], [3]], [[3.0]]))
+        ?assertEqual([[6.0]], matmul([[2.0]], [[3.0]])),
+        ?assertEqual(
+            [[5.0, 11.0], [11.0, 25.0]], matmul([[1.0, 2.0], [3.0, 4.0]], [[1.0, 3.0], [2.0, 4.0]])
+        ),
+        ?assertEqual([[30, 36, 42]], matmul([[1, 2, 3]], [[1, 2, 3], [4, 5, 6], [7, 8, 9]])),
+        ?assertEqual(
+            [[14], [32], [50]], matmul([[1, 2, 3], [4, 5, 6], [7, 8, 9]], [[1], [2], [3]])
+        ),
+        ?_assertException(error, function_clause, matmul([[2.0], [3]], [[3.0]]))
     ].
 
-inv_test()->
+inv_test() ->
     [
-	?assertEqual([[0.125]],inv([[8]])),
-	?assertEqual([[1.0,0.0],[0.0,0.5]],inv([[1,0],[0,2]])),
-	?assertEqual([[-1.0,-1.0,2.0],[-1.0,0.0,1.0],[2.0,1.0,-2.0]],inv([[1,0,1],[0,2,1],[1,1,1]]))
+        ?assertEqual([[0.125]], inv([[8]])),
+        ?assertEqual([[1.0, 0.0], [0.0, 0.5]], inv([[1, 0], [0, 2]])),
+        ?assertEqual(
+            [[-1.0, -1.0, 2.0], [-1.0, 0.0, 1.0], [2.0, 1.0, -2.0]],
+            inv([[1, 0, 1], [0, 2, 1], [1, 1, 1]])
+        )
     ].
 
-zeros_test()->
+zeros_test() ->
     [
-    ?assertEqual([],zeros(0)),
-    ?assertEqual([0,0],zeros(2)),
-    ?assertEqual([[]],zeros(0,0)),
-    ?assertEqual([[]],zeros(1,0)),
-    ?assertEqual([[]],zeros(0,2)),
-    ?assertEqual([[0]],zeros(1,1)),
-    ?assertEqual([[0,0,0],[0,0,0]],zeros(2,3))
+        ?assertEqual([], zeros(0)),
+        ?assertEqual([0, 0], zeros(2)),
+        ?assertEqual([[]], zeros(0, 0)),
+        ?assertEqual([[]], zeros(1, 0)),
+        ?assertEqual([[]], zeros(0, 2)),
+        ?assertEqual([[0]], zeros(1, 1)),
+        ?assertEqual([[0, 0, 0], [0, 0, 0]], zeros(2, 3))
     ].
 
-ones_test()->
+ones_test() ->
     [
-    ?assertEqual([],ones(0)),
-    ?assertEqual([1,1],ones(2)),
-    ?assertEqual([[]],ones(0,0)),
-    ?assertEqual([[]],ones(1,0)),
-    ?assertEqual([[]],ones(0,2)),
-    ?assertEqual([[1]],ones(1,1)),
-    ?assertEqual([[1,1,1],[1,1,1]],ones(2,3))
+        ?assertEqual([], ones(0)),
+        ?assertEqual([1, 1], ones(2)),
+        ?assertEqual([[]], ones(0, 0)),
+        ?assertEqual([[]], ones(1, 0)),
+        ?assertEqual([[]], ones(0, 2)),
+        ?assertEqual([[1]], ones(1, 1)),
+        ?assertEqual([[1, 1, 1], [1, 1, 1]], ones(2, 3))
     ].
 
-fill_test()->
+fill_test() ->
     [
-    ?assertEqual(zeros(2),fill(2,0)),
-    ?assertEqual(ones(3),fill(3,1)),
-    ?assertEqual([2,2,2,2],fill(4,2)),
-    ?assertEqual([[]],fill(0,0,8)),
-    ?assertEqual([[]],fill(1,0,7)),
-    ?assertEqual([[]],fill(0,2,1)),
-    ?assertEqual(zeros(2,3),fill(2,3,0)),
-    ?assertEqual(ones(3,4),fill(3,4,1)),
-    ?assertEqual([[2],[2],[2],[2]],fill(4,1,2))
+        ?assertEqual(zeros(2), fill(2, 0)),
+        ?assertEqual(ones(3), fill(3, 1)),
+        ?assertEqual([2, 2, 2, 2], fill(4, 2)),
+        ?assertEqual([[]], fill(0, 0, 8)),
+        ?assertEqual([[]], fill(1, 0, 7)),
+        ?assertEqual([[]], fill(0, 2, 1)),
+        ?assertEqual(zeros(2, 3), fill(2, 3, 0)),
+        ?assertEqual(ones(3, 4), fill(3, 4, 1)),
+        ?assertEqual([[2], [2], [2], [2]], fill(4, 1, 2))
     ].

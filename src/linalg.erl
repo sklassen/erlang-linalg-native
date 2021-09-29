@@ -397,7 +397,7 @@ inv([[X]]) ->
 inv([[A, B], [C, D]]) ->
     case det([[A, B], [C, D]]) of
         0.0 -> ?ERR;
-        Det -> [[D / Det, -B / Det ], [-C / Det, A / Det]]
+        Det -> [[D / Det, -B / Det], [-C / Det, A / Det]]
     end;
 inv(M) ->
     case det(M) of
