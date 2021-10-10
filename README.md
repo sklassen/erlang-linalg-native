@@ -50,9 +50,9 @@ Matrix and Vector
  - matmul(m,n)
 
 Decomposition
+ - lu(m)
  - qr(m) 
  - cholesky(m)
- - lu(m)
  - roots(v) (upto third order)
 
 Norms and others
@@ -105,6 +105,16 @@ Eshell V5.10.4  (abort with ^G)
     
 1> linalg:add(10,[[1,2,3],[4,5,6]]).
 ```
+
+# TODO
+ - adjoint
+ - eig
+ - eigh
+ - eigvals
+ - eigvalsh
+ - lstsq 
+ - svd
+ - pinv
 
 # License
 
