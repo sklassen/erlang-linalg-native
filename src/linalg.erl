@@ -3,7 +3,7 @@
 -author('simon.klassen').
 
 -export([row/2, col/2, cell/3, set_cell/4]).
--export([transpose/1, flipud/1, fliplr/1]).
+-export([transpose/1, t/1, flipud/1, fliplr/1]).
 -export([det/1, inv/1, shape/1,reshape/2]).
 -export([dot/2, inner/2, outer/2, matmul/2, solve/2]).
 -export([zeros/1, ones/1, sequential/1, random/1]).
@@ -14,7 +14,7 @@
 -export([mean/1, median/1, std/1, var/1, cov/2]).
 -export([epsilon/1, exp/1, abs/1, log/1, sqrt/1]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
--export([roots/1, lu/1, qr/1, cholesky/1]).
+-export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
 -export([min/1, max/1, argmin/1, argmax/1]).
 
 -define(EPSILON, 1.0e-12).
@@ -185,7 +185,7 @@ set_cell(I, J, Value, Matrix) ->
     Row = row(I, Matrix),
     set_nth(I, Matrix, set_nth(J, Row, Value)).
 
-% Transformation
+% Transformation 
 -spec transpose(matrix()) -> matrix().
 transpose([[]]) ->
     [];
@@ -195,6 +195,10 @@ transpose([[] | Rows]) ->
     transpose(Rows);
 transpose([[X | Xs] | Rows]) ->
     [[X | [H || [H | _] <- Rows]] | transpose([Xs | [Tail || [_ | Tail] <- Rows]])].
+
+-spec t(matrix()) -> matrix().
+t(M) ->
+    transpose(M).
 
 -spec flipud(matrix()) -> matrix().
 flipud(M) ->
@@ -448,6 +452,10 @@ lu(RowWise) ->
 -spec qr(matrix()) -> {matrix(), matrix()}.
 qr(RowWise) ->
     linalg_qr:qr(RowWise).
+
+-spec svd(matrix()) -> {matrix(), vector(),matrix()}.
+svd(RowWise) ->
+    linalg_svd_power:svd(RowWise).
 
 % private arithmetic functions
 
