@@ -1,13 +1,13 @@
 -module(linalg).
--vsn('1.0.1').
+-vsn('1.2.0').
 -author('simon.klassen').
 
 -export([row/2, col/2, cell/3, set_cell/4]).
 -export([transpose/1, flipud/1, fliplr/1]).
--export([det/1, inv/1, shape/1]).
+-export([det/1, inv/1, shape/1,reshape/2]).
 -export([dot/2, inner/2, outer/2, matmul/2, solve/2]).
 -export([zeros/1, ones/1, sequential/1, random/1]).
--export([zeros/2, ones/2, sequential/2, random/2]).
+-export([zeros/2, ones/2, sequential/2, random/2,random/3]).
 -export([fill/2, fill/3]).
 -export([identity/1, diag/1, eye/1, eye/2]).
 -export([add/2, sub/2, mul/2, divide/2, pow/2]).
@@ -36,6 +36,15 @@ shape([[X | _] | _] = Matrix) when is_number(X) ->
     NCols = length(lists:nth(1, Matrix)),
     {NRows, NCols}.
 
+-spec reshape(vector(),{dim(), dim()}) -> matrix().
+reshape(Xs,{NR,NC})->
+  reshape(lists:flatten(Xs),{NR,NC},[]).
+reshape([],{_R,_C},Acc)->
+  lists:reverse(Acc);
+reshape(Xs,{NR,NC},Acc)->
+  {Row,Rest}=lists:split(NC,Xs),
+  reshape(Rest,{NR,NC},[Row|Acc]).
+
 % generation (vector)
 -spec zeros(dim()) -> vector().
 zeros(0) ->
@@ -56,10 +65,24 @@ sequential(N) ->
     [X || X <- lists:seq(1, N)].
 
 -spec random(dim()) -> vector().
-random(0) ->
-    [];
-random(N) ->
-    [rand:uniform() || _ <- lists:seq(1, N)].
+random(N) when is_integer(N) andalso N>0->
+    random(N,rand:seed(exsplus),[]).
+-spec random(dim(), dim()) -> matrix().
+random(NR, NC) when is_integer(NR) andalso is_integer(NC) ->
+    random(NR,NC,[{seed,rand:seed(exsplus)}]);
+
+random(N,[{seed,Seed}]) when is_integer(N) ->
+    random(N,Seed,[]).
+
+random(NR,NC,[{seed,Seed}]) when is_integer(NR) andalso is_integer(NC) ->
+    reshape(random(NR*NC,Seed,[]),{NR,NC});
+
+random(0,_,Acc)->
+    Acc;
+random(N,Seed,Acc)->
+    {X,NextSeed}=rand:uniform_s(Seed),
+    random(N-1,NextSeed,[X|Acc]).
+
 
 -spec fill(dim(), scalar()) -> vector().
 fill(0, _) ->
@@ -87,10 +110,6 @@ ones(NR, NC) ->
 -spec sequential(dim(), dim()) -> matrix().
 sequential(NR, NC) ->
     [[(((R - 1) * NC) + C) / 1.0 || C <- lists:seq(1, NC)] || R <- lists:seq(1, NR)].
-
--spec random(dim(), dim()) -> matrix().
-random(NR, NC) ->
-    [[rand:uniform() || _ <- lists:seq(1, NC)] || _ <- lists:seq(1, NR)].
 
 -spec fill(dim(), dim(), scalar()) -> matrix().
 fill(0, _, _) ->
