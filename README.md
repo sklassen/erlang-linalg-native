@@ -17,9 +17,9 @@ Suggestions, enhancements and pull-requests welcomed.
 
 # Installation
 
-There are no dependancies. In the top directory, compile using rebar.
+There are no dependancies. In the top directory, compile using rebar/rebar3.
 
-> rebar compile
+> rebar3 compile
 
 To include it as a rebar.config dependancy, add the line below.
 ```
