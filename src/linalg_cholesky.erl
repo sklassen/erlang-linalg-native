@@ -47,6 +47,6 @@ crout(N, Matrix) ->
     crout(N + 1, lists:append(Top, NewBottom)).
 
 sqrt(X) when X < 0 ->
-    erlang:error({error, matrix_not_positive_defined});
+    erlang:error("linalg:cholesky matrix not positive defined");
 sqrt(X) ->
     math:sqrt(X).
