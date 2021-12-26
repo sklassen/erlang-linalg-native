@@ -215,7 +215,11 @@ dot(VecA, VecB) ->
     lists:foldl(fun(X, Sum) -> Sum + X end, 0, lists:zipwith(fun(X, Y) -> X * Y end, VecA, VecB)).
 
 % Matrix Multiplication
--spec matmul(matrix(), matrix()) -> matrix().
+-spec matmul(matrix()|vector(), matrix()|vector()) -> matrix().
+matmul(M = [V0|_], V = [X0|_]) when is_list(V0) andalso is_number(X0) ->
+    [[ dot(Row,V) || Row <- M]];
+matmul(V = [X0|_], M = [V0|_]) when is_number(X0) andalso is_list(V0) ->
+    [[ dot(Row,V) || Row <- transpose(M)]];
 matmul(M1 = [H1 | _], M2) when length(H1) =:= length(M2) ->
     matmul(M1, transpose(M2), []);
 matmul([_H1 | _],_M2)->
