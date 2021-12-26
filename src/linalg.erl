@@ -13,6 +13,7 @@
 -export([add/2, sub/2, mul/2, divide/2, pow/2]).
 -export([mean/1, median/1, std/1, var/1, cov/2]).
 -export([epsilon/1, exp/1, abs/1, log/1, sqrt/1]).
+-export([floor/1,ceil/1,around/1,around/2]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
 -export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
 -export([min/1, max/1, argmin/1, argmax/1]).
@@ -216,7 +217,9 @@ dot(VecA, VecB) ->
 % Matrix Multiplication
 -spec matmul(matrix(), matrix()) -> matrix().
 matmul(M1 = [H1 | _], M2) when length(H1) =:= length(M2) ->
-    matmul(M1, transpose(M2), []).
+    matmul(M1, transpose(M2), []);
+matmul([_H1 | _],_M2)->
+  erlang:error("linalg:matmul matrix dim mismatch").
 matmul([], _, R) ->
     lists:reverse(R);
 matmul([Row | Rest], M2, R) ->
@@ -252,6 +255,19 @@ log(M) ->
 
 sqrt(M) ->
     sig1(M, fun(X) -> math:sqrt(X) end, []).
+
+floor(M) ->
+    sig1(M, fun(X) -> math:floor(X) end, []).
+
+ceil(M) ->
+    sig1(M, fun(X) -> math:ceil(X) end, []).
+
+around(M) ->
+    sig1(M, fun(X) -> round(X) end, []).
+
+around(M,DP) ->
+    Scale=math:pow(10,DP),
+    sig1(M, fun(X) -> round(X*Scale)/Scale end, []).
 
 epsilon(M) ->
     sig1(
