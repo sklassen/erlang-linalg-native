@@ -2,7 +2,7 @@
 -vsn('1.0.1').
 -author('simon.klassen').
 
--export([row/2, col/2, cell/3, set_cell/4]).
+-export([row/2, col/2, cell/3, set_cell/4, set_row/3, set_col/3]).
 -export([transpose/1, flipud/1, fliplr/1]).
 -export([det/1, inv/1, shape/1]).
 -export([dot/2, inner/2, outer/2, matmul/2, solve/2]).
@@ -165,6 +165,14 @@ cell(I, J, Matrix) ->
 set_cell(I, J, Value, Matrix) ->
     Row = row(I, Matrix),
     set_nth(I, Matrix, set_nth(J, Row, Value)).
+
+-spec set_row(dim(), vector() | matrix(), matrix()) -> matrix().
+set_row(I, Value, Matrix) ->
+    set_nth(I, Matrix, Value).
+
+-spec set_col(dim(), vector() | matrix(), matrix()) -> matrix().
+set_col(I, Value, Matrix) ->
+    transpose(set_row(I, Value, transpose(Matrix))).
 
 % Transformation
 -spec transpose(matrix()) -> matrix().
