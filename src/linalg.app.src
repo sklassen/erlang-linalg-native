@@ -1,5 +1,5 @@
 {application, linalg, [
-    {description, ""},
+    {description, "A native Erlang linear algebra library"},
     {vsn, "1"},
     {registered, []},
     {applications, [
