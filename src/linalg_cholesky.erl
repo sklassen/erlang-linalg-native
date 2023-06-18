@@ -1,7 +1,7 @@
 -module(linalg_cholesky).
 -vsn('1.0').
 -author('simon.klassen').
--export([crout/1]).
+-export([cholesky/1]).
 
 -type scalar() :: number().
 -type vector() :: list(scalar()).
@@ -20,10 +20,11 @@
 %>>> np.linalg.cholesky([[18, 22,  54,  42], [22, 70,  86,  62], [54, 86, 174, 134], [42, 62, 134, 106]])
 %
 
--spec crout(matrix()) -> matrix().
-crout(RowWise) ->
+-spec cholesky(matrix()) -> matrix().
+cholesky(RowWise) ->
     crout(0, RowWise).
 
+-spec crout(number(),matrix()) -> matrix().
 crout(N, Matrix) when N == length(Matrix) ->
     Matrix;
 crout(N, Matrix) ->
