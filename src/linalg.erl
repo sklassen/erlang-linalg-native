@@ -122,9 +122,9 @@ eye(N, M) ->
 diag([X | _] = V) when is_number(X) ->
     [
         [
-            case R of
-                C -> lists:nth(R, V);
-                _ -> 0
+            case R==C of
+                true -> lists:nth(R, V);
+                false -> 0
             end
          || R <- lists:seq(1, length(V))
         ]
@@ -264,9 +264,9 @@ divide(M1, M2) ->
         M1,
         M2,
         fun(A, B) ->
-            case B of
-                0 -> ?NA;
-                B -> A / B
+            case B==0 of
+                true -> ?NA;
+                false -> A / B
             end
         end,
         []
@@ -428,7 +428,7 @@ roots(Vector) ->
 
 -spec cholesky(matrix()) -> matrix().
 cholesky(RowWise) ->
-    linalg_cholesky:crout(RowWise).
+    linalg_cholesky:cholesky(RowWise).
 
 -spec lu(matrix()) -> {matrix(), matrix()}.
 lu(RowWise) ->
