@@ -186,9 +186,6 @@ set_cell(I, J, Value, Matrix) ->
     Row = row(I, Matrix),
     set_nth(I, Matrix, set_nth(J, Row, Value)).
 
-<<<<<<< HEAD
-% Transformation 
-=======
 -spec set_row(dim(), vector() | matrix(), matrix()) -> matrix().
 set_row(I, Value, Matrix) ->
     set_nth(I, Matrix, Value).
@@ -197,8 +194,7 @@ set_row(I, Value, Matrix) ->
 set_col(I, Value, Matrix) ->
     transpose(set_row(I, Value, transpose(Matrix))).
 
-% Transformation
->>>>>>> 1bbfcc5f7cd54ba097abd84a3c00479a185085b8
+% Transformation 
 -spec transpose(matrix()) -> matrix().
 transpose([[]]) ->
     [];
