@@ -159,7 +159,7 @@ identity(N) ->
     diag(ones(N)).
 
 % Reference
--spec row(dim(), matrix()) -> vector() | matrix().
+-spec row(number(), matrix()) -> vector() | matrix().
 row(0, _) ->
     [];
 row(I, Matrix) when I > 0 ->
@@ -168,7 +168,7 @@ row(I, Matrix) when I < 0 ->
     {A, [_ | B]} = lists:split(-(I + 1), Matrix),
     lists:append(A, B).
 
--spec col(dim(), matrix()) -> vector() | matrix().
+-spec col(number(), matrix()) -> vector() | matrix().
 col(0, _) ->
     [];
 col(J, Matrix) when J > 0 ->
@@ -473,7 +473,7 @@ roots(Vector) ->
 cholesky(RowWise) ->
     linalg_cholesky:cholesky(RowWise).
 
--spec lu(matrix()) -> {matrix(), matrix()}.
+-spec lu(matrix()) -> {matrix(), matrix(), matrix()}.
 lu(RowWise) ->
     linalg_lu:lu(RowWise).
 
