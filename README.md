@@ -32,7 +32,8 @@ To include it as a rebar.config dependancy, add the line below.
 
 Creation and Description
  - shape(m); reshape(m,{nr,nc})
- - row(i,m); col(j,m); cell(i,j,m); set_cell(i,j,value,m); set_row(i, value, m); set_col(i, value, m)
+ - row(i,m); col(j,m); cell(i,j,m)
+ - set_row(i, value, m); set_col(i, value, m); set_cell(i,j,value,m);
  - zeros(i); zeros(i,j)
  - ones(i); ones(i,j)
  - sequential(i); sequential(i,j)
