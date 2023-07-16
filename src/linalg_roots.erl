@@ -13,12 +13,12 @@ roots([]) ->
 % singleton
 roots([_]) ->
     [];
-% ax + b = 0
-roots([A, B]) ->
-    [-B / A];
 % ignore higher order when alpha is small
 roots([A | Tail]) when abs(A) < ?SMALL ->
     roots(Tail);
+% ax + b = 0
+roots([A, B]) ->
+    [-B / A];
 % quadratic polynomial
 % well known closed form
 % ax^2 + bx + c = 0
@@ -38,24 +38,25 @@ roots([1, A, B, C]) ->
     R2 = R * R,
 
     case R2 < Q3 of
-        true ->
-            % three real roots
-            TH = acos(R / sqrt(Q3)),
-            SqrtQ = sqrt(Q),
-            X1 = -2 * SqrtQ * cos(TH / 3) - A / 3,
-            X2 = -2 * SqrtQ * cos((TH + 2 * pi()) / 3) - A / 3,
-            X3 = -2 * SqrtQ * cos((TH - 2 * pi()) / 3) - A / 3,
-            lists:sort([X1, X2, X3]);
-        false ->
-            % one real root
-            Alpha = -sign(1, R) * pow(abs(R) + sqrt(R2 - Q3), 1 / 3),
-            Beta =
-                case Alpha of
-                    Alpha when abs(Alpha) < ?SMALL -> 0;
-                    Alpha -> Q / Alpha
-                end,
-            [(Alpha + Beta) - A / 3]
-    end.
+      true ->
+        % three real roots
+        TH = acos(R / sqrt(Q3)),
+        SqrtQ = sqrt(Q),
+        X1 = -2 * SqrtQ * cos(TH / 3) - A / 3,
+        X2 = -2 * SqrtQ * cos((TH + 2 * pi()) / 3) - A / 3,
+        X3 = -2 * SqrtQ * cos((TH - 2 * pi()) / 3) - A / 3,
+        lists:usort([X1, X2, X3]);
+      false ->
+        % one real root
+        Alpha = -sign(1, R) * pow(abs(R) + sqrt(R2 - Q3), 1 / 3),
+        Beta = case abs(Alpha) <?SMALL of
+                 true -> 0;
+                 false -> Q / Alpha
+               end,
+        [(Alpha + Beta) - A / 3]
+    end;
+roots([A, B, C, D]) ->
+  roots([1, B/A, C/A, D/A]).
 
 sign(A, B) ->
     case B >= 0.0 of
