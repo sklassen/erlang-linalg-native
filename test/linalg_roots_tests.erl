@@ -10,6 +10,9 @@ roots_0_test() ->
 roots_1_test() ->
     ?assert(roots([1]) == []).
 
+roots_01_test() ->
+    ?assert(roots([0,1]) == []).
+
 roots_2_test() ->
     ?assert(roots([1, 2]) == [-2.0]),
     Range = lists:seq(-10,10),
@@ -22,10 +25,16 @@ roots_3_test() ->
     ParamsList = [[A,B,C]||A <- Range, B <- Range, C <- Range],
     assert_roots(ParamsList).
 
-roots_4_test() ->
+roots_4_1_test() ->
     ?assert(roots([1, -6, 11, -6]) == [1, 2, 3]),
     Range = lists:seq(-10,10),
     ParamsList = [[1,B,C,D]||B <- Range, C <- Range, D <- Range],
+    assert_roots(ParamsList).
+
+roots_4_n_test() ->
+    ?assertEqual([-3.0, -0.5, 2.0],[round(X*10)/10||X<-roots([2, 3, -11, -6])]),
+    Range = lists:seq(-10,10),
+    ParamsList = [[A,B,C,D]||A <- Range, B <- Range, C <- Range, D <- Range],
     assert_roots(ParamsList).
 
 
