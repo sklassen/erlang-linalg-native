@@ -7,8 +7,9 @@
 -export([roots/1]).
 -define(SMALL, 1.0e-10).
 
--type vector() :: list(float).
--spec roots(vector()) -> vector().
+-type vector() :: list(number()).
+-type complex() :: Real::number() | {Real::number(), Imaginary::number()}.
+-spec roots(vector()) -> complex().
 % null case
 roots([]) ->
     [];
