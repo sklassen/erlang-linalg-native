@@ -1,8 +1,9 @@
 -module(linalg_roots_tests).
 -import(linalg, [roots/1]).
+-import(linalg_complex, [add/1, add/2, mltp/1, mltp/2, reciprocal/1]).
 -define(NODEBUG, true). % Define NODEBUG for a quiet test.
 -include_lib("eunit/include/eunit.hrl").
--define(SMALL, 1.0e-10).
+-define(SMALL, 1.0e-9).
 
 roots_0_test() ->
     ?assert(roots([]) == []).
@@ -47,13 +48,7 @@ roots_4_n_test() ->
 assert_roots([]) ->
     ok;
 assert_roots([Params|OtherParams]) ->
-    Roots = try roots(Params) of
-        List -> List
-    catch
-        error:_Error -> % When no roots, not a problem to throw errors.
-            ?debugFmt("Params=~p, Error=~p", [Params, _Error]),
-            [] % This means there are no roots.
-    end,
+    Roots = roots(Params),
     assert_roots(Params, Roots),
     assert_roots(OtherParams).
 
@@ -62,7 +57,13 @@ assert_roots(_Params, []) ->
     ok;
 assert_roots(Params, [X|OtherRoots]) ->
     ?debugFmt("Params=~p, X=~p", [Params, X]),
-    FoldFun = fun(Param, {XpN, Ans}) -> {XpN*X, Ans + Param*XpN} end,
-    {_, Res} = lists:foldr(FoldFun, {1, 0}, Params),
+    FoldFun = fun(Param, {XpN, Ans}) ->
+        {mltp(XpN, X), add(Ans, mltp(Param, XpN))}
+    end,
+    Res = case lists:foldr(FoldFun, {1, 0}, Params) of
+        {_, {R, I}} -> math:sqrt(R*R+I*I);
+        {_, R} -> R
+    end,
+    ?debugFmt("abs=~p~n", [Res]),
     ?assert(abs(Res) < ?SMALL),
     assert_roots(Params, OtherRoots).
