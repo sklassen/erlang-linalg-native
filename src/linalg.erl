@@ -11,8 +11,11 @@
 -export([fill/2, fill/3]).
 -export([identity/1, diag/1, eye/1, eye/2]).
 -export([add/2, sub/2, mul/2, divide/2, pow/2]).
+-export([log/1,log10/1,log2/1, sqrt/1]).
+-export([acos/1, asin/1, atan/1, acosh/1, asinh/1, atanh/1]).
+-export([ cos/1, cosh/1, sin/1, sinh/1, tan/1, tanh/1]).
 -export([mean/1, median/1, std/1, var/1, cov/2]).
--export([epsilon/1, exp/1, abs/1, log/1, sqrt/1]).
+-export([epsilon/1, exp/1, abs/1]).
 -export([floor/1,ceil/1,around/1,around/2]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
 -export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
@@ -266,6 +269,11 @@ abs(M) ->
 log(M) ->
     sig1(M, fun(X) -> math:log(X) end, []).
 
+log10(M)->
+    sig1(M, fun(X) -> math:log10(X) end, []).
+log2(M)->
+    sig1(M, fun(X) -> math:log2(X) end, []).
+
 sqrt(M) ->
     sig1(M, fun(X) -> math:sqrt(X) end, []).
 
@@ -293,6 +301,33 @@ epsilon(M) ->
         end,
         []
     ).
+
+% Trig 
+acos(M)->
+    sig1(M, fun(X) -> math:acos(X) end, []).
+acosh(M)->
+    sig1(M, fun(X) -> math:acosh(X) end, []).
+asin(M)->
+    sig1(M, fun(X) -> math:asin(X) end, []).
+asinh(M)->
+    sig1(M, fun(X) -> math:asinh(X) end, []).
+atan(M)->
+    sig1(M, fun(X) -> math:atan(X) end, []).
+atanh(M)->
+    sig1(M, fun(X) -> math:atanh(X) end, []).
+cos(M)->
+    sig1(M, fun(X) -> math:cos(X) end, []).
+cosh(M)->
+    sig1(M, fun(X) -> math:cosh(X) end, []).
+sin(M)->
+    sig1(M, fun(X) -> math:sin(X) end, []).
+sinh(M)->
+    sig1(M, fun(X) -> math:sinh(X) end, []).
+tan(M)->
+    sig1(M, fun(X) -> math:tan(X) end, []).
+tanh(M)->
+    sig1(M, fun(X) -> math:tanh(X) end, []).
+
 
 add(M1, M2) ->
     sig2(M1, M2, fun(A, B) -> A + B end, []).
