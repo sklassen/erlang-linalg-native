@@ -13,12 +13,13 @@
 -export([add/2, sub/2, mul/2, divide/2, pow/2]).
 -export([log/1,log10/1,log2/1, sqrt/1]).
 -export([acos/1, asin/1, atan/1, acosh/1, asinh/1, atanh/1]).
--export([ cos/1, cosh/1, sin/1, sinh/1, tan/1, tanh/1]).
+-export([cos/1, cosh/1, sin/1, sinh/1, tan/1, tanh/1]).
 -export([mean/1, median/1, std/1, var/1, cov/2]).
 -export([epsilon/1, exp/1, abs/1]).
 -export([floor/1,ceil/1,around/1,around/2]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
 -export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
+-export([real/1,imag/1]).
 -export([polyfit/3, polyval/2]).
 -export([min/1, max/1, argmin/1, argmax/1]).
 
@@ -328,6 +329,11 @@ tan(M)->
 tanh(M)->
     sig1(M, fun(X) -> math:tanh(X) end, []).
 
+real(M)->
+    sig1(M, fun(X) -> case X of {R,_I}->R; _-> X end end, []).
+
+imag(M)->
+    sig1(M, fun(X) -> case X of {_R,I}->I; _-> 0 end end, []).
 
 add(M1, M2) ->
     sig2(M1, M2, fun(A, B) -> A + B end, []).
@@ -353,6 +359,7 @@ divide(M1, M2) ->
 
 pow(M1, M2) ->
     sig2(M1, M2, fun(A, B) -> math:pow(A, B) end, []).
+
 
 % Reductions
 sum(X) when is_number(X) -> X;
@@ -532,12 +539,16 @@ polyval(Coeff,X) ->
 
 % private arithmetic functions
 
+sig1(X,_Fun, _) when is_atom(X) ->
+    X;
+sig1({R,I}, Fun, _) when is_number(R) andalso is_number(I) ->
+    Fun({R,I});
 sig1(X, Fun, _) when is_number(X) ->
     Fun(X);
 sig1([], _Fun, Acc) ->
     lists:reverse(Acc);
-sig1([H | _] = Vector, Fun, []) when is_number(H) ->
-    [Fun(X) || X <- Vector];
+sig1([H | _] = Vector, Fun, []) when is_number(H) orelse is_atom(H) orelse is_tuple(H)->
+    [case is_atom(X) of true->X; false -> Fun(X) end || X <- Vector];
 sig1([R1 | Matrix], Fun, Acc) ->
     sig1(Matrix, Fun, [[Fun(X) || X <- R1] | Acc]).
 
