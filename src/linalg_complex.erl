@@ -145,13 +145,13 @@ to_float(Float) when is_float(Float) -> Float.
 %% +-*/
 '+'(Z) when is_number(Z) -> Z;
 '+'(Z) -> Z.
-'+'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 + Z1;
+'+'(Z0, Z1) when is_number(Z0), is_number(Z1) -> Z0 + Z1;
 '+'(Z0, Z1) -> sum(Z0, Z1).
 '-'(Z) when is_number(Z) -> -Z;
 '-'(Z) -> mltp(-1, Z).
-'-'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 - Z1;
+'-'(Z0, Z1) when is_number(Z0), is_number(Z1) -> Z0 - Z1;
 '-'(Z0, Z1) -> sum(Z0, mltp(-1, Z1)).
-'*'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 * Z1;
+'*'(Z0, Z1) when is_number(Z0), is_number(Z1) -> Z0 * Z1;
 '*'(Z0, Z1) -> mltp(Z0, Z1).
-'/'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 / Z1;
+'/'(Z0, Z1) when is_number(Z0), is_number(Z1) -> Z0 / Z1;
 '/'(Z0, Z1) -> mltp(Z0, reciprocal(Z1)).
