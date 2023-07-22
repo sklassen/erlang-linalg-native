@@ -1,15 +1,14 @@
 -module(linalg_roots).
 -vsn('1.0').
 -author('simon.klassen').
--import(math, [pi/0, acos/1, cos/1, pow/2]).
--import(linalg_complex, [sqrt/1, qbrt/1]).
+-import(linalg_complex, [sqrt/1, qbrt/1, absolute/1, usort/1]).
 -import(linalg_complex, [add/1, add/2, mltp/1, mltp/2, reciprocal/1]).
 -export([roots/1]).
 -define(SMALL, 1.0e-10).
 
--type vector() :: list(number()).
 -type complex() :: Real::number() | {Real::number(), Imaginary::number()}.
--spec roots(vector()) -> complex().
+-type vector() :: list(complex()).
+-spec roots(vector()) -> vector().
 % null case
 roots([]) ->
     [];
@@ -17,20 +16,22 @@ roots([]) ->
 roots([_]) ->
     [];
 % ignore higher order when alpha is small
-roots([A | Tail]) when abs(A) < ?SMALL ->
+roots([{R,I} | Tail]) when abs(R) < ?SMALL, abs(I) < ?SMALL ->
+    roots(Tail);
+roots([A | Tail]) when is_number(A), abs(A) < ?SMALL ->
     roots(Tail);
 % ax + b = 0
 roots([A, B]) ->
-    [-B / A];
+    [mltp([-1, B, reciprocal(A)])];
 % quadratic polynomial
 % well known closed form
 % ax^2 + bx + c = 0
 roots([A, B, C]) ->
     Denom = reciprocal(mltp(2,A)), % 1/(2*A)
-    P = mltp(Denom, -B), % -b/(2*A)
+    P = mltp([-1, B, Denom]), % -b/(2*A)
     % Q = sqrt(B^2-4*A*C)/(2*A)
     Q = mltp(Denom, sqrt(add(mltp(B, B), mltp([-4, A, C])))),
-    lists:usort([add(P, Q), add(P, mltp(-1, Q))]); % P +/- Q
+    usort([add(P, Q), add(P, mltp(-1, Q))]); % P +/- Q
 % cubic polynomial
 % viete
 % x^3 + bx^2 + cx +d = 0
@@ -44,28 +45,29 @@ roots([1, B, C, D]) ->
         mltp([4,B,B,B,D]), mltp([4,C,C,C]), mltp([-1,B,B,C,C])
     ])))),
     
-    % Wp = (-1+sqrt(3)i)/2
-    % Wn = (-1-sqrt(3)i)/2
-    Wp = {-1/2, sqrt(3)/2},
-    Wn = {-1/2, -sqrt(3)/2},
+    % W = (-1+sqrt(3)i)/2
+    W = {-1/2, sqrt(3)/2},
     
     % QpR = qbrt(Q+R)
     % QnR = qbrt(Q-R)
-    QpR = qbrt(add(Q, R)),
-    QnR = qbrt(add(Q, mltp(-1, R))),
+    QpR0 = qbrt(add(Q, R)),
+    QnR0 = qbrt(add(Q, mltp(-1, R))),
+    QpRs = [QpR0, mltp(W,QpR0), mltp([W,W,QpR0])],
+    QnRs = [QnR0, mltp(W,QnR0), mltp([W,W,QnR0])],
     
-    % X1 = P + QpR + QnR
-    % X2 = P + Wp * QpR + Wn * QnR
-    % X3 = P + Wn * QpR + Wp * QnR
-    X1 = add([P, QpR, QnR]),
-    X2 = add([P, mltp(Wp, QpR), mltp(Wn, QnR)]),
-    X3 = add([P, mltp(Wn, QpR), mltp(Wp, QnR)]),
-    lists:usort([X1, X2, X3]);
+    % X = P + QpRs + QnRs
+    PossibleX = [add([P, QpR, QnR]) || QpR<-QpRs, QnR<-QnRs],
+    XList = lists:filter(roots_filter([1,B,C,D]), PossibleX),
+    usort(XList);
 roots([A, B, C, D]) ->
-  roots([1, B/A, C/A, D/A]).
+    Ar = reciprocal(A), % Ar = 1/A
+    roots([1, mltp(B, Ar), mltp(C, Ar), mltp(D, Ar)]).
 
-sign(A, B) ->
-    case B >= 0.0 of
-        true -> abs(A);
-        false -> -abs(A)
+roots_filter(Params) ->
+    fun(X) ->
+        FoldFun = fun(Param, {XpN, Ans}) ->
+            {mltp(XpN, X), add(Ans, mltp(Param, XpN))}
+        end,
+        {_, Complex} = lists:foldr(FoldFun, {1, 0}, Params),
+        absolute(Complex) < ?SMALL
     end.
