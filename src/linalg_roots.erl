@@ -8,7 +8,7 @@
 
 -type complex() :: Real::number() | {Real::number(), Imaginary::number()}.
 -type vector() :: list(complex()).
--spec roots(vector()) -> complex().
+-spec roots(vector()) -> vector().
 % null case
 roots([]) ->
     [];
