@@ -35,7 +35,7 @@ ln(Complex) ->
         true -> to_complex({math:log(Radius), Angle})
     end.
 
--spec pow(complex(), number()) -> complex().
+-spec pow(complex(), complex()) -> complex().
 pow(Z, N) ->
     case {to_polar(Z), to_polar(N)} of
         {{_,Rz,_},{_,Rn,_}} when Rz<?SMALL,Rn<?SMALL ->
@@ -111,6 +111,7 @@ arg({Real,Imaginary}) ->
         I<0 -> -math:acos(R)
     end.
 
+-spec usort([complex()]) -> complex().
 usort([]) -> [];
 usort(List) when is_list(List) ->
     [Head|Tail] = lists:usort(List),
