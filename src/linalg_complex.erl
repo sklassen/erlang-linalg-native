@@ -5,7 +5,8 @@
 
 -export([to_polar/1, from_polar/1]).
 -export([exp/1, ln/1, pow/2, sqrt/1, qbrt/1, absolute/1, arg/1]). 
--export([add/1, add/2, mltp/1, mltp/2, reciprocal/1, usort/1]).
+-export([sum/1, sum/2, mltp/1, mltp/2, reciprocal/1, usort/1]).
+-export(['+'/1, '+'/2, '-'/1, '-'/2, '*'/2, '/'/2]).
 
 -type non_neg_real() :: number(). % but not negative please.
 -type angle() :: number(). % principal value is -PI < argZ =< PI
@@ -63,13 +64,13 @@ absolute({R,I}) when is_number(R), is_number(I) ->
 absolute(R) when is_number(R) ->
     0.0+abs(R).
 
--spec add([complex(), ...]) -> complex().
-add(ComplexList) ->
-    FoldFun = fun(X, Prev) -> add(X, Prev) end,
+-spec sum([complex(), ...]) -> complex().
+sum(ComplexList) ->
+    FoldFun = fun(X, Prev) -> sum(X, Prev) end,
     lists:foldl(FoldFun, 0, ComplexList).
 
--spec add(complex(), complex()) -> complex().
-add(A, B) ->
+-spec sum(complex(), complex()) -> complex().
+sum(A, B) ->
     {Ar, Ai} = to_tuple(A),
     {Br, Bi} = to_tuple(B),
     to_complex({Ar+Br, Ai+Bi}).
@@ -116,8 +117,8 @@ usort([]) -> [];
 usort(List) when is_list(List) ->
     [Head|Tail] = lists:usort(List),
     FoldFun = fun(X, {[Y|Prev], C}) ->
-        case absolute(add(X,mltp(-1,Y))) < ?SMALL of
-            true -> {[mltp(1/(C+1),add(X,mltp(C,Y)))|Prev], C+1};
+        case absolute(sum(X,mltp(-1,Y))) < ?SMALL of
+            true -> {[mltp(1/(C+1),sum(X,mltp(C,Y)))|Prev], C+1};
             false -> {[X|[Y|Prev]], 1}
         end
     end,
@@ -140,3 +141,17 @@ to_complex(N) -> to_float(N).
 -spec to_float(number()) -> float().
 to_float(Integer) when is_integer(Integer) -> 0.0+Integer;
 to_float(Float) when is_float(Float) -> Float.
+
+%% +-*/
+'+'(Z) when is_number(Z) -> Z;
+'+'(Z) -> Z.
+'+'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 + Z1;
+'+'(Z0, Z1) -> sum(Z0, Z1).
+'-'(Z) when is_number(Z) -> -Z;
+'-'(Z) -> mltp(-1, Z).
+'-'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 - Z1;
+'-'(Z0, Z1) -> sum(Z0, mltp(-1, Z1)).
+'*'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 * Z1;
+'*'(Z0, Z1) -> mltp(Z0, Z1).
+'/'(Z0, Z1) when is_number(Z0), is_number(Z0) -> Z0 / Z1;
+'/'(Z0, Z1) -> mltp(Z0, reciprocal(Z1)).

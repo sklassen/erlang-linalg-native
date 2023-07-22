@@ -2,7 +2,7 @@
 -import(linalg_complex, [to_polar/1, from_polar/1]).
 -import(linalg_complex, [exp/1, ln/1, pow/2]).
 -import(linalg_complex, [sqrt/1, qbrt/1, absolute/1, arg/1, usort/1]).
--import(linalg_complex, [add/1, add/2, mltp/1, mltp/2, reciprocal/1]).
+-import(linalg_complex, [sum/1, sum/2, mltp/1, mltp/2, reciprocal/1]).
 -export([approx/1]).
 -define(NODEBUG, true). % Define NODEBUG for a quiet test.
 -include_lib("eunit/include/eunit.hrl").
@@ -313,17 +313,30 @@ complex_usort_1_test() ->
         [1,9,2,8,3,7,4,6,5,5,6,4,7,3,8,2,8.99999999999,1.00000000001]
     ))).
 
-complex_add_1_test() ->
-    ?assertEqual({7.0,8.0}, add([1, {2,0}, {0,3}, {4,5}])).
+complex_arithmetic_test() ->
+    ?assertEqual([
+        {6.0,8.0},
+        {2.0,2.0},
+        {-7.0,22.0},
+        {1.769231,-0.153846}
+    ], approx([
+        linalg:add({4,5}, {2,3}),
+        linalg:sub({4,5}, {2,3}),
+        linalg:mul({4,5}, {2,3}),
+        linalg:divide({4,5}, {2,3})
+    ])).
 
-complex_add_2_test() ->
-    ?assertEqual(3.0, add(1, 2)),
-    ?assertEqual(3.0, add({1,0}, 2)),
-    ?assertEqual(3.0, add(1, {2,0})),
-    ?assertEqual(3.0, add({1,0}, {2,0})),
-    ?assertEqual({3.0,9.0}, add({1,4}, {2,5})),
-    ?assertEqual({-4.0,2.0}, add({1,4}, {-5,-2})),
-    ?assertEqual({6.8,11.2}, add({1.2,3.4}, {5.6,7.8})).
+complex_sum_1_test() ->
+    ?assertEqual({7.0,8.0}, sum([1, {2,0}, {0,3}, {4,5}])).
+
+complex_sum_2_test() ->
+    ?assertEqual(3.0, sum(1, 2)),
+    ?assertEqual(3.0, sum({1,0}, 2)),
+    ?assertEqual(3.0, sum(1, {2,0})),
+    ?assertEqual(3.0, sum({1,0}, {2,0})),
+    ?assertEqual({3.0,9.0}, sum({1,4}, {2,5})),
+    ?assertEqual({-4.0,2.0}, sum({1,4}, {-5,-2})),
+    ?assertEqual({6.8,11.2}, sum({1.2,3.4}, {5.6,7.8})).
 
 complex_mltp_1_test() ->
     ?assertEqual([{-196.0,83.0}], approx([mltp([{2,3},{4,5},{6,7}])])).
