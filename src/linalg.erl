@@ -14,7 +14,7 @@
 -export([log/1,log10/1,log2/1, sqrt/1]).
 -export([acos/1, asin/1, atan/1, acosh/1, asinh/1, atanh/1]).
 -export([cos/1, cosh/1, sin/1, sinh/1, tan/1, tanh/1]).
--export([mean/1, median/1, std/1, var/1, cov/2]).
+-export([mean/1, median/1, std/1, var/1, cov/2,cor/2,cov2cor/1]).
 -export([epsilon/1, exp/1, abs/1]).
 -export([floor/1,ceil/1,around/1,around/2]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
@@ -471,9 +471,25 @@ cov([X | XTail], [Y | YTail], {X0, Y0, DX, DXX, DY, DYY, DXY, N}) ->
     cov(
         XTail,
         YTail,
-        {X0, Y0, DX + (X - X0), DXX + (X - X0) * (X - X0), DY + (Y - Y0), DYY + (Y - Y0) * (Y - Y0),
-            DXY + (X - X0) * (Y - Y0), N + 1}
+        {X0, Y0, 
+         DX + (X - X0), DXX + (X - X0) * (X - X0), DY + (Y - Y0), 
+         DYY + (Y - Y0) * (Y - Y0), DXY + (X - X0) * (Y - Y0), 
+         N + 1}
     ).
+
+-spec cor(vector(),vector())->matrix().
+cor(Xs,Ys) ->
+  pearson(Xs,Ys).
+
+pearson(Xs,Ys) ->
+  [[XX,XY],[XY,YY]]= cov(Xs,Ys),
+  XY / (sqrt(XX) * sqrt(YY)).
+
+
+-spec cov2cor(matrix()) -> matrix().
+cov2cor(Cov) ->
+  D = diag([1/X || X<- sqrt(diag(Cov))]),
+  matmul(t(matmul(t(Cov),D)),D).
 
 % Solves
 -spec det(matrix()) -> scalar().
