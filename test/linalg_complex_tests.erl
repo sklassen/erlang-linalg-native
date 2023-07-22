@@ -314,6 +314,7 @@ complex_usort_1_test() ->
     ))).
 
 complex_arithmetic_test() ->
+    ?assertEqual(complex_infinity, catch linalg:divide(1,0)),
     ?assertEqual([
         {6.0,8.0},
         {2.0,2.0},

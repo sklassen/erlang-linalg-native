@@ -349,10 +349,7 @@ divide(M1, M2) ->
         M1,
         M2,
         fun(A, B) ->
-            case B==0 of
-                true -> ?NA;
-                false -> linalg_complex:'/'(A, B)
-            end
+            linalg_complex:'/'(A, B)
         end,
         []
     ).
