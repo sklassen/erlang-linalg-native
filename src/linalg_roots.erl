@@ -2,7 +2,7 @@
 -vsn('1.0').
 -author('simon.klassen').
 -import(linalg_complex, [sqrt/1, qbrt/1, absolute/1, usort/1]).
--import(linalg_complex, [add/1, add/2, mltp/1, mltp/2, reciprocal/1]).
+-import(linalg_complex, [sum/1, sum/2, mltp/1, mltp/2, reciprocal/1]).
 -export([roots/1]).
 -define(SMALL, 1.0e-10).
 
@@ -30,17 +30,17 @@ roots([A, B, C]) ->
     Denom = reciprocal(mltp(2,A)), % 1/(2*A)
     P = mltp([-1, B, Denom]), % -b/(2*A)
     % Q = sqrt(B^2-4*A*C)/(2*A)
-    Q = mltp(Denom, sqrt(add(mltp(B, B), mltp([-4, A, C])))),
-    usort([add(P, Q), add(P, mltp(-1, Q))]); % P +/- Q
+    Q = mltp(Denom, sqrt(sum(mltp(B, B), mltp([-4, A, C])))),
+    usort([sum(P, Q), sum(P, mltp(-1, Q))]); % P +/- Q
 % cubic polynomial
 % viete
 % x^3 + bx^2 + cx +d = 0
 roots([1, B, C, D]) ->
     P = mltp(-1/3, B), % -b/3
     % Q = (-2B^3+9BC-27D)/54
-    Q = mltp(1/54, add([mltp([-2,B,B,B]), mltp([9, B, C]), mltp(-27, D)])),
+    Q = mltp(1/54, sum([mltp([-2,B,B,B]), mltp([9, B, C]), mltp(-27, D)])),
     % R = sqrt(3*(27D^2-18BCD+4B^3D+4C^3-B^2C^2))/18
-    R = mltp(1/18, sqrt(mltp(3, add([
+    R = mltp(1/18, sqrt(mltp(3, sum([
         mltp([27,D,D]), mltp([-18,B,C,D]),
         mltp([4,B,B,B,D]), mltp([4,C,C,C]), mltp([-1,B,B,C,C])
     ])))),
@@ -50,13 +50,13 @@ roots([1, B, C, D]) ->
     
     % QpR = qbrt(Q+R)
     % QnR = qbrt(Q-R)
-    QpR0 = qbrt(add(Q, R)),
-    QnR0 = qbrt(add(Q, mltp(-1, R))),
+    QpR0 = qbrt(sum(Q, R)),
+    QnR0 = qbrt(sum(Q, mltp(-1, R))),
     QpRs = [QpR0, mltp(W,QpR0), mltp([W,W,QpR0])],
     QnRs = [QnR0, mltp(W,QnR0), mltp([W,W,QnR0])],
     
     % X = P + QpRs + QnRs
-    PossibleX = [add([P, QpR, QnR]) || QpR<-QpRs, QnR<-QnRs],
+    PossibleX = [sum([P, QpR, QnR]) || QpR<-QpRs, QnR<-QnRs],
     XList = lists:filter(roots_filter([1,B,C,D]), PossibleX),
     usort(XList);
 roots([A, B, C, D]) ->
@@ -66,7 +66,7 @@ roots([A, B, C, D]) ->
 roots_filter(Params) ->
     fun(X) ->
         FoldFun = fun(Param, {XpN, Ans}) ->
-            {mltp(XpN, X), add(Ans, mltp(Param, XpN))}
+            {mltp(XpN, X), sum(Ans, mltp(Param, XpN))}
         end,
         {_, Complex} = lists:foldr(FoldFun, {1, 0}, Params),
         absolute(Complex) < ?SMALL
