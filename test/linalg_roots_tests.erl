@@ -1,7 +1,7 @@
 -module(linalg_roots_tests).
 -import(linalg, [roots/1]).
 -import(linalg_complex_tests, [approx/1]).
--import(linalg_complex, [add/1, add/2, mltp/1, mltp/2, reciprocal/1]).
+-import(linalg_complex, [sum/2, mltp/2]).
 -define(NODEBUG, true). % Define NODEBUG for a quiet test.
 -include_lib("eunit/include/eunit.hrl").
 -define(SMALL, 1.0e-9).
@@ -52,12 +52,13 @@ roots_4_n_test() ->
     Range = lists:seq(-5,5),
     ParamsList = [[A,B,C,D]||A <- Range, B <- Range, C <- Range, D <- Range],
     assert_roots(ParamsList),
-    R = lists:seq(1,2) ++ lists:seq(-2,-1),
-    I = lists:seq(-2,2),
+    R = [-1,1,2],
+    I = [-1,0,1,2],
     ComplexParamsList = [[{Ar,Ai},{Br,Bi},{Cr,Ci},{Dr,Di}]
-        ||Ar<-R, Ai<-R, Br<-R, Bi<-R, Cr<-R, Ci<-R, Dr<-R, Di<-R
+        ||Ar<-R, Ai<-I, Br<-R, Bi<-I, Cr<-R, Ci<-I, Dr<-R, Di<-I
     ],
-    assert_roots(ComplexParamsList).
+    assert_roots(ComplexParamsList),
+    true.
 
 
 %% @doc Assert roots with any given params.
@@ -79,7 +80,7 @@ assert_roots(_Params, []) ->
 assert_roots(Params, [X|OtherRoots]) ->
     ?debugFmt("Params=~p, X=~p", [Params, X]),
     FoldFun = fun(Param, {XpN, Ans}) ->
-        {mltp(XpN, X), add(Ans, mltp(Param, XpN))}
+        {mltp(XpN, X), sum(Ans, mltp(Param, XpN))}
     end,
     Res = case lists:foldr(FoldFun, {1, 0}, Params) of
         {_, {R, I}} -> math:sqrt(R*R+I*I);

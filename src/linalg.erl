@@ -336,23 +336,20 @@ imag(M)->
     sig1(M, fun(X) -> case X of {_R,I}->I; _-> 0 end end, []).
 
 add(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A + B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'+'(A, B) end, []).
 
 sub(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A - B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'-'(A, B) end, []).
 
 mul(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A * B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'*'(A, B) end, []).
 
 divide(M1, M2) ->
     sig2(
         M1,
         M2,
         fun(A, B) ->
-            case B==0 of
-                true -> ?NA;
-                false -> A / B
-            end
+            linalg_complex:'/'(A, B)
         end,
         []
     ).
@@ -587,7 +584,9 @@ sig2(A, [R2 | M2], Fun, Acc) when is_number(A) ->
 sig2([R1 | M1], B, Fun, Acc) when is_number(B) ->
     sig2(M1, B, Fun, [[Fun(A, B) || A <- R1] | Acc]);
 sig2([R1 | M1], [R2 | M2], Fun, Acc) ->
-    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- lists:zip(R1, R2)] | Acc]).
+    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- lists:zip(R1, R2)] | Acc]);
+sig2(A, B, Fun, []) ->
+    Fun(A, B).
 
 reduction([], _Fun, Init) ->
     Init;
