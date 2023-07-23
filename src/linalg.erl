@@ -509,20 +509,19 @@ inv([[A, B], [C, D]]) ->
         0.0 -> ?ERR;
         Det -> [[D / Det, -B / Det], [-C / Det, A / Det]]
     end;
-inv(M) ->
-    case det(M) of
+inv(Matrix) ->
+    {NRows, NCols} = shape(Matrix),
+    case det(Matrix) of
         0.0 -> ?ERR;
-        Det -> divide(transpose(mul(minors(M), cofactors(M))), Det)
+        Det -> divide(transpose(mul(minors(Matrix,NRows, NCols), cofactors(NRows, NCols))), Det)
     end.
 
--spec minors(matrix()) -> matrix().
-minors(Matrix) ->
-    {NRows, NCols} = shape(Matrix),
+-spec minors(matrix(),dim(),dim()) -> matrix().
+minors(Matrix,NRows, NCols) ->
     [[det(col(-J, row(-I, Matrix))) || J <- lists:seq(1, NCols)] || I <- lists:seq(1, NRows)].
 
--spec cofactors(matrix()) -> matrix().
-cofactors(Matrix) ->
-    {NRows, NCols} = shape(Matrix),
+-spec cofactors(dim(),dim()) -> matrix().
+cofactors(NRows, NCols) ->
     [[pow(-1, I) * pow(-1, J) || J <- lists:seq(0, NCols - 1)] || I <- lists:seq(0, NRows - 1)].
 
 -spec roots(vector()) -> vector().
