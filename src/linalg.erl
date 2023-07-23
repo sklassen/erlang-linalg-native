@@ -21,6 +21,7 @@
 -export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
 -export([real/1,imag/1]).
 -export([polyfit/3, polyval/2]).
+-export([minimize/2, minimize/3]).
 -export([min/1, max/1, argmin/1, argmax/1]).
 
 -define(EPSILON, 1.0e-12).
@@ -513,7 +514,7 @@ inv(Matrix) ->
     {NRows, NCols} = shape(Matrix),
     case det(Matrix) of
         0.0 -> ?ERR;
-        Det -> divide(transpose(mul(minors(Matrix,NRows, NCols), cofactors(NRows, NCols))), Det)
+        Det -> divide(transpose(mul(minors(Matrix, NRows, NCols), cofactors(NRows, NCols))), Det)
     end.
 
 -spec minors(matrix(),dim(),dim()) -> matrix().
@@ -526,31 +527,37 @@ cofactors(NRows, NCols) ->
 
 -spec roots(vector()) -> vector().
 roots(Vector) ->
-    linalg_roots:roots(Vector).
+  linalg_roots:roots(Vector).
 
 -spec cholesky(matrix()) -> matrix().
 cholesky(RowWise) ->
-    linalg_cholesky:cholesky(RowWise).
+  linalg_cholesky:cholesky(RowWise).
 
 -spec lu(matrix()) -> {matrix(), matrix(), matrix()}.
 lu(RowWise) ->
-    linalg_lu:lu(RowWise).
+  linalg_lu:lu(RowWise).
 
 -spec qr(matrix()) -> {matrix(), matrix()}.
 qr(RowWise) ->
-    linalg_qr:qr(RowWise).
+  linalg_qr:qr(RowWise).
 
 -spec svd(matrix()) -> {matrix(), vector(),matrix()}.
 svd(RowWise) ->
-    linalg_svd_power:svd(RowWise).
+  linalg_svd_power:svd(RowWise).
 
 -spec polyfit(vector(),vector(),integer()) -> vector().
 polyfit(Xs,Ys,N) ->
-    linalg_poly:polyfit(Xs,Ys,N).
+  linalg_poly:polyfit(Xs,Ys,N).
 
 -spec polyval(vector(),scalar()) -> scalar().
 polyval(Coeff,X) ->
-    linalg_poly:polyfit(Coeff,X).
+  linalg_poly:polyfit(Coeff,X).
+
+minimize(Fun,Param) ->
+  linalg_minimize:minimize(Fun,Param).
+
+minimize(Fun,Param,Options) ->
+  linalg_minimize:minimize(Fun,Param,Options).
 
 % private arithmetic functions
 
