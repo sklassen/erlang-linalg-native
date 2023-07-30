@@ -2,7 +2,7 @@
 -vsn('1.2.0').
 -author('simon.klassen').
 
--export([row/2, col/2, cell/3, set_cell/4, set_row/3, set_col/3]).
+-export([row/2, col/2, cell/3, set_cell/4, set_row/3, set_col/3, set_nth/3]).
 -export([transpose/1, t/1, flipud/1, fliplr/1]).
 -export([det/1, inv/1, shape/1, reshape/2]).
 -export([dot/2, inner/2, outer/2, matmul/2, solve/2]).
@@ -223,17 +223,25 @@ flipud(M) ->
 fliplr(M) ->
     [lists:reverse(R) || R <- M].
 
-% Sum Product (slower than inner, for big vectors, but succient)
+% Dot Product (and its variations).
 -spec dot(vector(), vector()) -> scalar().
-dot(VecA, VecB) ->
-    lists:foldl(fun(X, Sum) -> Sum + X end, 0, lists:zipwith(fun(X, Y) -> X * Y end, VecA, VecB)).
+dot(A, B) when is_number(A) orelse is_number(B) ->
+  mul(A,B);
+dot(M1 = [V1|_], M2 = [V2|_]) when is_list(V1) andalso is_list(V2) ->
+  matmul(M1,M2);
+dot(M1 = [V1|_], V2=[S2|_]) when is_list(V1) andalso is_number(S2) ->
+  [ sum(V) || V <-matmul(M1,diag(V2))];
+dot(V1=[S1|_], M2 = [V2|_]) when is_number(S1) andalso is_list(V2) ->
+  [ sum(V) || V <- transpose(matmul(diag(V1),M2))];
+dot(V1, V2) ->
+  inner(V1,V2).
 
 % Matrix Multiplication
 -spec matmul(matrix()|vector(), matrix()|vector()) -> matrix().
 matmul(M = [V0|_], V = [X0|_]) when is_list(V0) andalso is_number(X0) ->
-    [[ dot(Row,V) || Row <- M]];
+    [[ inner(Row,V) || Row <- M]];
 matmul(V = [X0|_], M = [V0|_]) when is_number(X0) andalso is_list(V0) ->
-    [[ dot(Row,V) || Row <- transpose(M)]];
+    [[ inner(Row,V) || Row <- transpose(M)]];
 matmul(M1 = [H1 | _], M2) when length(H1) =:= length(M2) ->
     matmul(M1, transpose(M2), []);
 matmul([_H1 | _],_M2)->

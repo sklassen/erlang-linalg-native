@@ -32,8 +32,27 @@ set_col_test() ->
      ?assertEqual(set_col(1, [7, 8], Matrix), [[7, 2, 3], [8, 5, 6]])
     ].
 
-dot_3_test() ->
+dot_0_test() ->
+    ?assertEqual(12, dot(3,4)).
+dot_1_test() ->
     ?assertEqual(32.0, dot([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])).
+dot_2_test() ->
+    ?assertEqual([[4, 1],[2, 2]], dot([[1, 0], [0, 1]],[[4, 1], [2, 2]])).
+
+dot_3_test() ->
+    ?assertEqual([[8, 2], [4, 4]], dot([[4, 1], [2, 2]],2)).
+dot_4_test() ->
+    ?assertEqual([[8, 2], [4, 4]], dot(2,[[4, 1], [2, 2]])).
+
+dot_5_test() ->
+    ?assertEqual([11, 10], dot([[4, 1], [2, 2]],[2,3])).
+dot_6_test() ->
+    ?assertEqual([14, 8], dot([2,3],[[4, 1], [2, 2]])).
+
+dot_7_test() ->
+    ?assertEqual([[0.22000000000000003,0.2475,0.0825]], dot([[0.5, 0.25, 0.25]],[[0.4, 0.03, 0.05], [0.03, 0.9, 0.03], [0.05, 0.03, 0.2]])).
+dot_8_test() ->
+    ?assertEqual([[0.1925]],dot([[0.22,0.2475,0.0825]], [[0.5 ], [0.25], [0.25]])).
 
 transpose_test() ->
     [
