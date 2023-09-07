@@ -19,9 +19,11 @@ golden(_Fun,{A,B}) when abs(A-B)<?SMALL ->
 golden(Fun,{A,B})->
   X1=?GLD*A+(1.0-?GLD)*B,
   X2=?GLD*B+(1.0-?GLD)*A,
-  case {Fun(X1),Fun(X2)} of
+  try {Fun(X1),Fun(X2)} of
     {FX1,FX2} when FX1<FX2 -> golden(Fun,{A,X2});
     {_,_} -> golden(Fun,{X1,B})
+  catch 
+    _:_ -> erlang:error("minimize function failed (golden)")
   end.
 
 brute(Fun,{A,B}) when A>B ->
@@ -34,7 +36,9 @@ brute(Fun,{A,B}) ->
 brute(_Fun,[],{ArgMin,_Min}) ->
   ArgMin;
 brute(Fun,[X|Tail],{ArgMin,Min})->
-  case Fun(X*?SMALL) of
+  try Fun(X*?SMALL) of
     NewMin when NewMin<Min -> brute(Fun,Tail,{X*?SMALL,NewMin});
     _Next -> brute(Fun,Tail,{ArgMin,Min})
+  catch 
+    _:_ -> erlang:error("minimize function failed (golden)")
   end.
