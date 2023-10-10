@@ -30,7 +30,7 @@ det([H | Tail]) when length(H) == 5 andalso length([H | Tail]) == 5 ->
 det([H | Tail] = RowWise) when length(H) == length([H | Tail]) ->
     det(RowWise, 1);
 det(_) ->
-    erlang:error({error, matrix_not_square}).
+    erlang:error("linalg:det matrix not square").
 
 % Gauss-Jordan elimination
 det(RowWise, N) when length(RowWise) == N ->

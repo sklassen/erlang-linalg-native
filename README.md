@@ -1,5 +1,5 @@
-Erlang Native Matrix Functions
-============================
+Erlang Native Matrix Functions (v1.2)
+=====================================
 
 This is an native Erlang linear algebra library (linalg). 
 The function signatures and results strive to match numpy and scipy linalg.
@@ -13,13 +13,18 @@ Erlang's lists:nth indexes start at 1; and linalg's Row, Col, Cell, ArgMax and A
 function use this convention. This differs from python et al at start at 0.
 Like the numpy and scipy, matrix input is alway expected to be Row Major. 
 
+In version 1.2 there is now support for complex numbers. And there is a svd power 
+function that uses qr Householder method.
+
+Errors are now raised and return a string message rather than a error tuple. 
+
 Suggestions, enhancements and pull-requests welcomed. 
 
 # Installation
 
-There are no dependancies. In the top directory, compile using rebar.
+There are no dependancies. In the top directory, compile using rebar/rebar3.
 
-> rebar compile
+> rebar3 compile
 
 To include it as a rebar.config dependancy, add the line below.
 ```
@@ -31,12 +36,13 @@ To include it as a rebar.config dependancy, add the line below.
 # Functions
 
 Creation and Description
- - shape(m)
- - row(i,m); col(j,m); cell(i,j,m); set_cell(i,j,value,m); set_row(i, value, m); set_col(i, value, m)
+ - shape(m); reshape(m,{nr,nc})
+ - row(i,m); col(j,m); cell(i,j,m)
+ - set_row(i, value, m); set_col(i, value, m); set_cell(i,j,value,m);
  - zeros(i); zeros(i,j)
  - ones(i); ones(i,j)
  - sequential(i); sequential(i,j)
- - random(i); random(i,j)
+ - random(i); random(i,j) (also add option [{seed,rand:seed(exsplus, {42, 123534, 345345})}])
  - fill(i,value); fill(i,j,value)
  - eye(i); eye(i,j)
  - identity(v)
@@ -46,12 +52,13 @@ Matrix and Vector
  - dot(a,b)
  - inner(a,b)
  - outer(a,b)
- - transpose(m)
+ - transpose(m) or t(m)
  - matmul(m,n)
 
 Decomposition
  - lu(m)
  - qr(m) 
+ - svd(m) (approx. using simultaneous power iteration)
  - cholesky(m)
  - roots(v) (upto third order)
 
@@ -72,6 +79,9 @@ Basic Scalar, Vector and Matrix Arithmetric
  - sqrt(m)
  - abs(m)
  - log(m)
+ - floor(m)
+ - ceil(m)
+ - around(m), around(m,bp)
 
 Reductions
  - sum(m)
@@ -86,6 +96,8 @@ Reductions
  - max(m)
  - argmin(m)
  - argmax(m)
+
+Note: errors return as erlang:error(String). 
 
 # Usage
 
@@ -113,7 +125,7 @@ Eshell V5.10.4  (abort with ^G)
  - eigvals
  - eigvalsh
  - lstsq 
- - svd
+ - svd (improved)
  - pinv
 
 # License

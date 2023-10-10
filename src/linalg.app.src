@@ -1,6 +1,6 @@
 {application, linalg, [
     {description, "A native Erlang linear algebra library"},
-    {vsn, "1"},
+    {vsn, "1.2"},
     {registered, []},
     {applications, [
         kernel,

@@ -1,20 +1,27 @@
 -module(linalg).
--vsn('1.0.1').
+-vsn('1.2.0').
 -author('simon.klassen').
 
--export([row/2, col/2, cell/3, set_cell/4, set_row/3, set_col/3]).
--export([transpose/1, flipud/1, fliplr/1]).
--export([det/1, inv/1, shape/1]).
+-export([row/2, col/2, cell/3, set_cell/4, set_row/3, set_col/3, set_nth/3]).
+-export([transpose/1, t/1, flipud/1, fliplr/1]).
+-export([det/1, inv/1, shape/1, reshape/2]).
 -export([dot/2, inner/2, outer/2, matmul/2, solve/2]).
 -export([zeros/1, ones/1, sequential/1, random/1]).
--export([zeros/2, ones/2, sequential/2, random/2]).
+-export([zeros/2, ones/2, sequential/2, random/2,random/3]).
 -export([fill/2, fill/3]).
 -export([identity/1, diag/1, eye/1, eye/2]).
 -export([add/2, sub/2, mul/2, divide/2, pow/2]).
--export([mean/1, median/1, std/1, var/1, cov/2]).
--export([epsilon/1, exp/1, abs/1, log/1, sqrt/1]).
+-export([log/1,log10/1,log2/1, sqrt/1]).
+-export([acos/1, asin/1, atan/1, acosh/1, asinh/1, atanh/1]).
+-export([cos/1, cosh/1, sin/1, sinh/1, tan/1, tanh/1]).
+-export([mean/1, median/1, std/1, var/1, cov/2,cor/2,cov2cor/1]).
+-export([epsilon/1, exp/1, abs/1]).
+-export([floor/1,ceil/1,around/1,around/2]).
 -export([sum/1, sumsq/1, prod/1, norm/1]).
--export([roots/1, lu/1, qr/1, cholesky/1]).
+-export([roots/1, lu/1, qr/1, cholesky/1, svd/1]).
+-export([real/1,imag/1]).
+-export([polyfit/3, polyval/2]).
+-export([minimize/2, minimize/3]).
 -export([min/1, max/1, argmin/1, argmax/1]).
 
 -define(EPSILON, 1.0e-12).
@@ -36,6 +43,15 @@ shape([[X | _] | _] = Matrix) when is_number(X) ->
     NCols = length(lists:nth(1, Matrix)),
     {NRows, NCols}.
 
+-spec reshape(vector(),{dim(), dim()}) -> matrix().
+reshape(Xs,{NR,NC})->
+  reshape(lists:flatten(Xs),{NR,NC},[]).
+reshape([],{_R,_C},Acc)->
+  lists:reverse(Acc);
+reshape(Xs,{NR,NC},Acc)->
+  {Row,Rest}=lists:split(NC,Xs),
+  reshape(Rest,{NR,NC},[Row|Acc]).
+
 % generation (vector)
 -spec zeros(dim()) -> vector().
 zeros(0) ->
@@ -56,10 +72,24 @@ sequential(N) ->
     [X || X <- lists:seq(1, N)].
 
 -spec random(dim()) -> vector().
-random(0) ->
-    [];
-random(N) ->
-    [rand:uniform() || _ <- lists:seq(1, N)].
+random(N) when is_integer(N) andalso N>0->
+    random(N,rand:seed(exsplus),[]).
+-spec random(dim(), dim()) -> matrix().
+random(NR, NC) when is_integer(NR) andalso is_integer(NC) ->
+    random(NR,NC,[{seed,rand:seed(exsplus)}]);
+
+random(N,[{seed,Seed}]) when is_integer(N) ->
+    random(N,Seed,[]).
+
+random(NR,NC,[{seed,Seed}]) when is_integer(NR) andalso is_integer(NC) ->
+    reshape(random(NR*NC,Seed,[]),{NR,NC});
+
+random(0,_,Acc)->
+    Acc;
+random(N,Seed,Acc)->
+    {X,NextSeed}=rand:uniform_s(Seed),
+    random(N-1,NextSeed,[X|Acc]).
+
 
 -spec fill(dim(), scalar()) -> vector().
 fill(0, _) ->
@@ -87,10 +117,6 @@ ones(NR, NC) ->
 -spec sequential(dim(), dim()) -> matrix().
 sequential(NR, NC) ->
     [[(((R - 1) * NC) + C) / 1.0 || C <- lists:seq(1, NC)] || R <- lists:seq(1, NR)].
-
--spec random(dim(), dim()) -> matrix().
-random(NR, NC) ->
-    [[rand:uniform() || _ <- lists:seq(1, NC)] || _ <- lists:seq(1, NR)].
 
 -spec fill(dim(), dim(), scalar()) -> matrix().
 fill(0, _, _) ->
@@ -139,7 +165,7 @@ identity(N) ->
     diag(ones(N)).
 
 % Reference
--spec row(dim(), matrix()) -> vector() | matrix().
+-spec row(number(), matrix()) -> vector() | matrix().
 row(0, _) ->
     [];
 row(I, Matrix) when I > 0 ->
@@ -148,7 +174,7 @@ row(I, Matrix) when I < 0 ->
     {A, [_ | B]} = lists:split(-(I + 1), Matrix),
     lists:append(A, B).
 
--spec col(dim(), matrix()) -> vector() | matrix().
+-spec col(number(), matrix()) -> vector() | matrix().
 col(0, _) ->
     [];
 col(J, Matrix) when J > 0 ->
@@ -174,7 +200,7 @@ set_row(I, Value, Matrix) ->
 set_col(I, Value, Matrix) ->
     transpose(set_row(I, Value, transpose(Matrix))).
 
-% Transformation
+% Transformation 
 -spec transpose(matrix()) -> matrix().
 transpose([[]]) ->
     [];
@@ -185,6 +211,10 @@ transpose([[] | Rows]) ->
 transpose([[X | Xs] | Rows]) ->
     [[X | [H || [H | _] <- Rows]] | transpose([Xs | [Tail || [_ | Tail] <- Rows]])].
 
+-spec t(matrix()) -> matrix().
+t(M) ->
+    transpose(M).
+
 -spec flipud(matrix()) -> matrix().
 flipud(M) ->
     lists:reverse(M).
@@ -193,15 +223,29 @@ flipud(M) ->
 fliplr(M) ->
     [lists:reverse(R) || R <- M].
 
-% Sum Product (slower than inner, for big vectors, but succient)
+% Dot Product (and its variations).
 -spec dot(vector(), vector()) -> scalar().
-dot(VecA, VecB) ->
-    lists:foldl(fun(X, Sum) -> Sum + X end, 0, lists:zipwith(fun(X, Y) -> X * Y end, VecA, VecB)).
+dot(A, B) when is_number(A) orelse is_number(B) ->
+  mul(A,B);
+dot(M1 = [V1|_], M2 = [V2|_]) when is_list(V1) andalso is_list(V2) ->
+  matmul(M1,M2);
+dot(M1 = [V1|_], V2=[S2|_]) when is_list(V1) andalso is_number(S2) ->
+  [ sum(V) || V <-matmul(M1,diag(V2))];
+dot(V1=[S1|_], M2 = [V2|_]) when is_number(S1) andalso is_list(V2) ->
+  [ sum(V) || V <- transpose(matmul(diag(V1),M2))];
+dot(V1, V2) ->
+  inner(V1,V2).
 
 % Matrix Multiplication
--spec matmul(matrix(), matrix()) -> matrix().
+-spec matmul(matrix()|vector(), matrix()|vector()) -> matrix().
+matmul(M = [V0|_], V = [X0|_]) when is_list(V0) andalso is_number(X0) ->
+    [[ inner(Row,V) || Row <- M]];
+matmul(V = [X0|_], M = [V0|_]) when is_number(X0) andalso is_list(V0) ->
+    [[ inner(Row,V) || Row <- transpose(M)]];
 matmul(M1 = [H1 | _], M2) when length(H1) =:= length(M2) ->
-    matmul(M1, transpose(M2), []).
+    matmul(M1, transpose(M2), []);
+matmul([_H1 | _],_M2)->
+  erlang:error("linalg:matmul matrix dim mismatch").
 matmul([], _, R) ->
     lists:reverse(R);
 matmul([Row | Rest], M2, R) ->
@@ -235,8 +279,26 @@ abs(M) ->
 log(M) ->
     sig1(M, fun(X) -> math:log(X) end, []).
 
+log10(M)->
+    sig1(M, fun(X) -> math:log10(X) end, []).
+log2(M)->
+    sig1(M, fun(X) -> math:log2(X) end, []).
+
 sqrt(M) ->
     sig1(M, fun(X) -> math:sqrt(X) end, []).
+
+floor(M) ->
+    sig1(M, fun(X) -> math:floor(X) end, []).
+
+ceil(M) ->
+    sig1(M, fun(X) -> math:ceil(X) end, []).
+
+around(M) ->
+    sig1(M, fun(X) -> round(X) end, []).
+
+around(M,DP) ->
+    Scale=math:pow(10,DP),
+    sig1(M, fun(X) -> round(X*Scale)/Scale end, []).
 
 epsilon(M) ->
     sig1(
@@ -250,30 +312,60 @@ epsilon(M) ->
         []
     ).
 
+% Trig 
+acos(M)->
+    sig1(M, fun(X) -> math:acos(X) end, []).
+acosh(M)->
+    sig1(M, fun(X) -> math:acosh(X) end, []).
+asin(M)->
+    sig1(M, fun(X) -> math:asin(X) end, []).
+asinh(M)->
+    sig1(M, fun(X) -> math:asinh(X) end, []).
+atan(M)->
+    sig1(M, fun(X) -> math:atan(X) end, []).
+atanh(M)->
+    sig1(M, fun(X) -> math:atanh(X) end, []).
+cos(M)->
+    sig1(M, fun(X) -> math:cos(X) end, []).
+cosh(M)->
+    sig1(M, fun(X) -> math:cosh(X) end, []).
+sin(M)->
+    sig1(M, fun(X) -> math:sin(X) end, []).
+sinh(M)->
+    sig1(M, fun(X) -> math:sinh(X) end, []).
+tan(M)->
+    sig1(M, fun(X) -> math:tan(X) end, []).
+tanh(M)->
+    sig1(M, fun(X) -> math:tanh(X) end, []).
+
+real(M)->
+    sig1(M, fun(X) -> case X of {R,_I}->R; _-> X end end, []).
+
+imag(M)->
+    sig1(M, fun(X) -> case X of {_R,I}->I; _-> 0 end end, []).
+
 add(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A + B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'+'(A, B) end, []).
 
 sub(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A - B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'-'(A, B) end, []).
 
 mul(M1, M2) ->
-    sig2(M1, M2, fun(A, B) -> A * B end, []).
+    sig2(M1, M2, fun(A, B) -> linalg_complex:'*'(A, B) end, []).
 
 divide(M1, M2) ->
     sig2(
         M1,
         M2,
         fun(A, B) ->
-            case B==0 of
-                true -> ?NA;
-                false -> A / B
-            end
+            linalg_complex:'/'(A, B)
         end,
         []
     ).
 
 pow(M1, M2) ->
     sig2(M1, M2, fun(A, B) -> math:pow(A, B) end, []).
+
 
 % Reductions
 sum(X) when is_number(X) -> X;
@@ -385,9 +477,25 @@ cov([X | XTail], [Y | YTail], {X0, Y0, DX, DXX, DY, DYY, DXY, N}) ->
     cov(
         XTail,
         YTail,
-        {X0, Y0, DX + (X - X0), DXX + (X - X0) * (X - X0), DY + (Y - Y0), DYY + (Y - Y0) * (Y - Y0),
-            DXY + (X - X0) * (Y - Y0), N + 1}
+        {X0, Y0, 
+         DX + (X - X0), DXX + (X - X0) * (X - X0), DY + (Y - Y0), 
+         DYY + (Y - Y0) * (Y - Y0), DXY + (X - X0) * (Y - Y0), 
+         N + 1}
     ).
+
+-spec cor(vector(),vector())->matrix().
+cor(Xs,Ys) ->
+  pearson(Xs,Ys).
+
+pearson(Xs,Ys) ->
+  [[XX,XY],[XY,YY]]= cov(Xs,Ys),
+  XY / (sqrt(XX) * sqrt(YY)).
+
+
+-spec cov2cor(matrix()) -> matrix().
+cov2cor(Cov) ->
+  D = diag([1/X || X<- sqrt(diag(Cov))]),
+  matmul(t(matmul(t(Cov),D)),D).
 
 % Solves
 -spec det(matrix()) -> scalar().
@@ -407,45 +515,67 @@ inv([[A, B], [C, D]]) ->
         0.0 -> ?ERR;
         Det -> [[D / Det, -B / Det], [-C / Det, A / Det]]
     end;
-inv(M) ->
-    case det(M) of
+inv(Matrix) ->
+    {NRows, NCols} = shape(Matrix),
+    case det(Matrix) of
         0.0 -> ?ERR;
-        Det -> divide(transpose(mul(minors(M), cofactors(M))), Det)
+        Det -> divide(transpose(mul(minors(Matrix, NRows, NCols), cofactors(NRows, NCols))), Det)
     end.
 
--spec minors(matrix()) -> matrix().
-minors(Matrix) ->
-    {NRows, NCols} = shape(Matrix),
+-spec minors(matrix(),dim(),dim()) -> matrix().
+minors(Matrix,NRows, NCols) ->
     [[det(col(-J, row(-I, Matrix))) || J <- lists:seq(1, NCols)] || I <- lists:seq(1, NRows)].
 
--spec cofactors(matrix()) -> matrix().
-cofactors(Matrix) ->
-    {NRows, NCols} = shape(Matrix),
+-spec cofactors(dim(),dim()) -> matrix().
+cofactors(NRows, NCols) ->
     [[pow(-1, I) * pow(-1, J) || J <- lists:seq(0, NCols - 1)] || I <- lists:seq(0, NRows - 1)].
 
+-spec roots(vector()) -> vector().
 roots(Vector) ->
-    linalg_roots:roots(Vector).
+  linalg_roots:roots(Vector).
 
 -spec cholesky(matrix()) -> matrix().
 cholesky(RowWise) ->
-    linalg_cholesky:cholesky(RowWise).
+  linalg_cholesky:cholesky(RowWise).
 
--spec lu(matrix()) -> {matrix(), matrix()}.
+-spec lu(matrix()) -> {matrix(), matrix(), matrix()}.
 lu(RowWise) ->
-    linalg_lu:lu(RowWise).
+  linalg_lu:lu(RowWise).
 
 -spec qr(matrix()) -> {matrix(), matrix()}.
 qr(RowWise) ->
-    linalg_qr:qr(RowWise).
+  linalg_qr:qr(RowWise).
+
+-spec svd(matrix()) -> {matrix(), vector(),matrix()}.
+svd(RowWise) ->
+  linalg_svd_power:svd(RowWise).
+
+-spec polyfit(vector(),vector(),integer()) -> vector().
+polyfit(Xs,Ys,N) ->
+  linalg_poly:polyfit(Xs,Ys,N).
+
+-spec polyval(vector(),scalar()) -> scalar().
+polyval(Coeff,X) ->
+  linalg_poly:polyfit(Coeff,X).
+
+minimize(Fun,Param) ->
+  linalg_minimize:minimize(Fun,Param).
+
+minimize(Fun,Param,Options) ->
+  linalg_minimize:minimize(Fun,Param,Options).
 
 % private arithmetic functions
 
+sig1(X,_Fun, _) when is_atom(X) ->
+    X;
+sig1({R,I}, Fun, _) when is_number(R) andalso is_number(I) ->
+    Fun({R,I});
 sig1(X, Fun, _) when is_number(X) ->
     Fun(X);
 sig1([], _Fun, Acc) ->
     lists:reverse(Acc);
-sig1([H | _] = Vector, Fun, []) when is_number(H) ->
-    [Fun(X) || X <- Vector];
+sig1([H | _] = Vector, Fun, []) when is_number(H) orelse is_atom(H) orelse is_tuple(H)->
+    [case is_atom(X) of true->X; false -> Fun(X) end || X <- Vector];
 sig1([R1 | Matrix], Fun, Acc) ->
     sig1(Matrix, Fun, [[Fun(X) || X <- R1] | Acc]).
 
@@ -468,7 +598,9 @@ sig2(A, [R2 | M2], Fun, Acc) when is_number(A) ->
 sig2([R1 | M1], B, Fun, Acc) when is_number(B) ->
     sig2(M1, B, Fun, [[Fun(A, B) || A <- R1] | Acc]);
 sig2([R1 | M1], [R2 | M2], Fun, Acc) ->
-    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- lists:zip(R1, R2)] | Acc]).
+    sig2(M1, M2, Fun, [[Fun(A, B) || {A, B} <- lists:zip(R1, R2)] | Acc]);
+sig2(A, B, Fun, []) ->
+    Fun(A, B).
 
 reduction([], _Fun, Init) ->
     Init;
