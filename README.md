@@ -1,5 +1,5 @@
-Erlang Native Matrix Functions
-============================
+Erlang Native Matrix Functions (v1.2)
+=====================================
 
 This is an native Erlang linear algebra library (linalg). 
 The function signatures and results strive to match numpy and scipy linalg.
@@ -12,6 +12,11 @@ than fast.
 Erlang's lists:nth indexes start at 1; and linalg's Row, Col, Cell, ArgMax and ArgMin 
 function use this convention. This differs from python et al at start at 0.
 Like the numpy and scipy, matrix input is alway expected to be Row Major. 
+
+In version 1.2 there is now support for complex numbers. And there is a svd power 
+function that uses qr Householder method.
+
+Errors are now raised and return a string message rather than a error tuple. 
 
 Suggestions, enhancements and pull-requests welcomed. 
 
